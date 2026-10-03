@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axiom • Auto-Updater</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #05050a;
+      color: #f0f0f7;
+      font-family: system-ui, -apple-system, sans-serif;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(139,108,255,0.25);
+      border-top-color: #8b6cff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status { font-size: 0.9rem; opacity: 0.7; }
+    .error { color: #ff6b6b; max-width: 420px; text-align: center; line-height: 1.5; }
+    button {
+      margin-top: 12px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(139,108,255,0.4);
+      background: rgba(139,108,255,0.15);
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner" id="spinner"></div>
+  <div class="status" id="status">Checking for latest version...</div>
+
+  <script>
+    const RAW_URL = "https://raw.githubusercontent.com/Onex558/Simple-Scramjet-proxy-static-HTML-/main/index.html";
+    const CACHE_KEY = "axiom_last_html";
+    const VERSION_KEY = "axiom_last_etag";
+
+    async function loadLatest() {
+      const status = document.getElementById("status");
+      const spinner = document.getElementById("spinner");
+
+      try {
+        status.textContent = "Downloading latest Axiom...";
+
+        const res = await fetch(RAW_URL + "?t=" + Date.now(), {
+          cache: "no-store"
+        });
+
+        if (!res.ok) throw new Error("GitHub returned " + res.status);
+
+        const html = await res.text();
+        const etag = res.headers.get("etag") || res.headers.get("last-modified") || String(html.length);
+
+        try {
+          localStorage.setItem(CACHE_KEY, html);
+          localStorage.setItem(VERSION_KEY, etag);
+        } catch (e) {}
+
+        document.open();
+        document.write(html);
+        document.close();
+
+      } catch (err) {
+        console.error(err);
+        spinner.style.display = "none";
+        status.innerHTML = `
+          <div class="error">
+            Could not reach GitHub.<br>
+            Trying cached version...
+          </div>
+        `;
+
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          setTimeout(() => {
+            document.open();
+            document.write(cached);
+            document.close();
+          }, 800);
+        } else {
+          status.innerHTML = `
+            <div class="error">
+              No cached version available.<br>
+              Check your connection or open the original repo.
+            </div>
+            <button onclick="location.reload()">Retry</button>
+            <button onclick="window.open('${RAW_URL}', '_blank')">Open raw file</button>
+          `;
+        }
+      }
+    }
+
+    loadLatest();
+  </script>
+</body>
+</html>
