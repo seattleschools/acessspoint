@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova</title>
+    <script>
+if (location.protocol === 'blob:' && new URL(document.baseURI).hostname === 'cdn.jsdelivr.net') {
+  const covenant_appURL = 'https://nova-ada.pages.dev/';
+  try {window.top.location.replace(covenant_appURL);}
+  catch {window.location.replace(covenant_appURL);}
+}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        
+          :root{
+            --bg: #0a0d16; --panel: #10131f; --panel-2: #151827;
+            --line: rgba(255,255,255,0.07); --line-strong: rgba(255,255,255,0.14);
+            --text: #eceefb; --muted: #7d84a3; --accent: #8b7bff; --accent-2: #4fe0c4;
+            --discord: #5865f2; --font-active: 'Outfit', sans-serif; --radius: 14px;
+          }
+          *{ box-sizing: border-box; }
+          html,body{ margin:0; padding:0; height:100%; background: var(--bg); color: var(--text); font-family: var(--font-active); overflow:hidden; }
+          button, select, input{ font-family: inherit; }
+          @media (prefers-reduced-motion: reduce){ *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
+        
+          .app{ display:flex; height:100vh; width:100vw; overflow:hidden; }
+          .sidebar{ width: 188px; min-width: 188px; background: var(--panel); border-right: 1px solid var(--line); display:flex; flex-direction:column; padding: 20px 10px; transition: width .22s ease, min-width .22s ease; position:relative; z-index: 5; }
+          .sidebar.collapsed{ width: 64px; min-width: 64px; }
+          .brand{ padding: 4px 10px 28px 10px; white-space:nowrap; overflow:hidden; }
+          .brand-full{ font-weight: 600; font-size: 20px; letter-spacing: 0.4px; background: linear-gradient(120deg, #ffffff, var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+          .sidebar.collapsed .brand{ display:none; }
+          .nav{ display:flex; flex-direction:column; gap: 4px; margin-top: 6px; }
+          .nav-item{ display:flex; align-items:center; gap: 12px; padding: 9px 10px; border-radius: 9px; color: var(--muted); background: transparent; border: none; cursor:pointer; text-align:left; width:100%; white-space:nowrap; overflow:hidden; text-decoration:none; }
+          .nav-item:hover{ background: var(--panel-2); color: var(--text); }
+          .nav-item.active{ background: var(--panel-2); color: var(--text); }
+          .nav-item.active .nav-icon{ color: var(--accent); }
+          .nav-icon{ width: 20px; height: 20px; min-width: 20px; display:flex; align-items:center; justify-content:center; color: var(--muted); }
+          .nav-icon svg{ width: 20px; height: 20px; display:block; }
+          .nav-label{ font-size: 14.5px; font-weight: 500; }
+          .sidebar.collapsed .nav-label{ display:none; }
+          .sidebar.collapsed .nav-item{ justify-content:center; gap: 0; }
+          .sidebar-footer{ margin-top:auto; padding-top: 10px; border-top: 1px solid var(--line); }
+          .collapse-btn{ display:flex; align-items:center; gap: 12px; padding: 9px 10px; border-radius: 9px; color: var(--muted); background: transparent; border: none; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; }
+          .collapse-btn:hover{ background: var(--panel-2); color: var(--text); }
+          .collapse-btn .nav-icon svg{ transition: transform .22s ease; }
+          .sidebar.collapsed .collapse-btn .nav-icon svg{ transform: rotate(180deg); }
+          .sidebar.collapsed .collapse-btn{ justify-content:center; }
+          .sidebar.collapsed .collapse-btn .nav-label{ display:none; }
+        
+          .main{ flex:1; position:relative; background-size: cover; background-position: center; display:flex; flex-direction:column; overflow:hidden; }
+          .main::before{ content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(6,8,14,0.40) 0%, rgba(6,8,14,0.10) 16%, rgba(6,8,14,0.10) 84%, rgba(6,8,14,0.40) 100%); pointer-events:none; z-index:1; }
+          .main.custom-bg::before{ background: linear-gradient(180deg, rgba(6,8,14,0.26) 0%, rgba(6,8,14,0.04) 16%, rgba(6,8,14,0.04) 84%, rgba(6,8,14,0.26) 100%); }
+          .texture-layer{ position:absolute; inset:0; pointer-events:none; z-index:0; }
+          .view{ position:relative; z-index:2; flex:1; min-width:0; display:none; overflow-y:auto; padding: 60px; }
+          .view.active{ display:flex; flex-direction:column; animation: viewIn .32s cubic-bezier(.22,.9,.3,1); }
+          @keyframes viewIn{ from{ opacity:0; transform: translateY(10px); } to{ opacity:1; transform:none; } }
+        
+          #view-home{ align-items:center; justify-content:center; text-align:center; padding: 40px; position: relative; }
+          #starfield{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+          .home-content{ position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; animation: home-rise .7s ease both; }
+          @keyframes home-rise{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform: translateY(0); } }
+          .home-wordmark{ font-size: clamp(3.5rem, 8vw, 6.75rem); font-weight: 700; letter-spacing: 2px; margin: 0; line-height:1; background: linear-gradient(135deg, #ffffff, var(--accent-2) 130%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 50px rgba(139,123,255,0.45); }
+          .home-tagline{ margin: 12px 0 30px 0; color: var(--muted); font-size: 15.5px; letter-spacing: 0.2px; max-width: 620px; }
+          .discord-pill{ display:inline-flex; align-items:center; gap: 9px; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line-strong); background: rgba(21,24,39,0.6); color: var(--text); font-size: 13.5px; font-weight: 500; text-decoration:none; cursor:pointer; transition: border-color .15s ease, background .15s ease; }
+          .discord-pill:hover{ border-color: rgba(88,101,242,0.55); background: rgba(88,101,242,0.12); }
+          .discord-pill svg{ width: 16px; height: 16px; color: var(--muted); transition: color .15s ease; }
+          .discord-pill:hover svg{ color: #fff; }
+        
+          #view-relics{ justify-content:flex-start; }
+          .view-header{ margin-bottom: 40px; }
+          .view-header h1{ margin:0 0 6px 0; font-size: 30px; font-weight: 600; }
+          .view-header p{ margin:0; color: var(--muted); font-size: 14.5px; }
+        
+          #view-settings{ align-items:stretch; }
+          .settings-grid{ display:flex; flex-direction:column; gap: 34px; max-width: 660px; }
+          .settings-section{ background: rgba(16,19,31,0.6); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+          .settings-section h2{ margin: 0 0 4px 0; font-size: 16px; font-weight: 600; display:flex; align-items:center; gap: 9px; }
+          .settings-section h2 .section-icon{ width: 18px; height: 18px; color: var(--accent); }
+          .settings-section h2 .section-icon svg{ width: 18px; height: 18px; display:block; }
+          .settings-section .desc{ margin: 0 0 18px 0; color: var(--muted); font-size: 13.5px; }
+          .font-options{ display:flex; flex-wrap:wrap; gap: 10px; }
+          .font-chip{ padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--panel-2); color: var(--text); cursor:pointer; font-size: 14px; }
+          .font-chip.selected{ border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; color: var(--accent); }
+          .theme-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+          .theme-swatch{ aspect-ratio: 16/10; border-radius: 10px; border: 2px solid transparent; cursor:pointer; position:relative; background-size: cover; background-position:center; overflow:hidden; }
+          .theme-swatch.selected{ border-color: var(--accent); }
+          .theme-swatch .check{ position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:50%; background: var(--accent); display:none; align-items:center; justify-content:center; }
+          .theme-swatch.selected .check{ display:flex; }
+          .theme-swatch .check svg{ width:11px; height:11px; color:#0a0d16; }
+          .theme-swatch .theme-name{ position:absolute; left:8px; bottom:6px; font-size: 11px; font-weight: 600; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+          .custom-wallpaper-row{ margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+          .custom-wallpaper-row .label-block h3{ margin:0 0 3px 0; font-size: 14.5px; font-weight: 500; }
+          .custom-wallpaper-row .label-block p{ margin:0 0 12px 0; font-size: 13px; color: var(--muted); }
+          .toggle-row{ display:flex; align-items:center; justify-content:space-between; gap: 20px; }
+          .toggle-row .label-block h3{ margin:0 0 3px 0; font-size: 14.5px; font-weight: 500; }
+          .toggle-row .label-block p{ margin:0; font-size: 13px; color: var(--muted); }
+          .switch{ position:relative; width: 44px; height: 26px; min-width: 44px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line-strong); cursor:pointer; }
+          .switch::after{ content:""; position:absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius:50%; background: var(--muted); transition: transform .18s ease, background .18s ease; }
+          .switch.on{ background: rgba(139,123,255,0.25); border-color: var(--accent); }
+          .switch.on::after{ transform: translateX(18px); background: var(--accent); }
+        
+          .cloak-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+          .cloak-chip{ padding: 11px 6px 9px 6px; border-radius: 11px; border: 1px solid var(--line-strong); background: var(--panel-2); color: var(--text); cursor:pointer; font-size: 12px; font-weight: 500; text-align:center; display:flex; flex-direction:column; align-items:center; gap: 7px; transition: border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .12s ease; }
+          .cloak-chip:hover{ border-color: var(--accent); }
+          .cloak-chip.selected{ border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; color: var(--accent); }
+          .cloak-chip .cloak-ico{ width: 22px; height: 22px; display:flex; align-items:center; justify-content:center; }
+          .cloak-chip .cloak-ico img{ width: 22px; height: 22px; border-radius: 5px; object-fit: contain; }
+          .cloak-chip .cloak-ico svg{ width: 20px; height: 20px; color: var(--muted); }
+          .cloak-chip.selected .cloak-ico svg{ color: var(--accent); }
+          .cloak-input-wrap{ display:flex; align-items:center; gap: 10px; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--line-strong); background: var(--panel-2); margin-bottom: 8px; }
+          .cloak-input-wrap .chrome-ico{ width:18px; height:18px; color: var(--muted); flex-shrink:0; }
+          .cloak-input-wrap .chrome-ico svg{ width:18px; height:18px; display:block; }
+          .cloak-input-wrap input{ flex:1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; min-width: 0; }
+          .cloak-input-wrap input::placeholder{ color: var(--muted); }
+          .cloak-hint{ font-size: 12px; color: var(--muted); margin: 0 0 18px 0; }
+          .text-input-wrap{ display:flex; align-items:center; gap: 10px; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--line-strong); background: var(--panel-2); }
+          .text-input-wrap .lead-ico{ width:18px; height:18px; color: var(--muted); flex-shrink:0; }
+          .text-input-wrap .lead-ico svg{ width:18px; height:18px; display:block; }
+          .text-input-wrap input{ flex:1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; min-width: 0; }
+          .text-input-wrap input::placeholder{ color: var(--muted); }
+          .sub-toggle-row{ display:flex; align-items:center; justify-content:space-between; gap: 20px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+          .settings-btn-row{ display:flex; flex-wrap:wrap; gap: 10px; margin-top: 16px; }
+          .ghost-btn{ padding: 10px 15px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--panel-2); color: var(--text); font-size: 13.5px; cursor:pointer; }
+          .ghost-btn:hover{ border-color: var(--accent); color: var(--accent); }
+          .view::-webkit-scrollbar{ width: 8px; }
+          .view::-webkit-scrollbar-thumb{ background: var(--line-strong); border-radius: 8px; }
+          @media (max-width: 720px){ .sidebar{ width: 64px; min-width:64px; } .sidebar .brand, .sidebar .nav-label, .sidebar .collapse-btn .nav-label{ display:none; } .home-wordmark{ font-size: 56px; } .view{ padding: 34px 22px; } .theme-grid{ grid-template-columns: repeat(2,1fr); } .cloak-grid{ grid-template-columns: repeat(3,1fr); } }
+        
+          .relics-toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap: 10px; margin: -18px 0 22px 0; }
+          .relics-seek{ flex:1; min-width: 200px; padding: 11px 14px; border-radius: 11px; border: 1px solid var(--line-strong); background: rgba(21,24,39,0.75); color: var(--text); font-size: 14px; outline: none; }
+          .relics-seek:focus{ border-color: var(--accent); }
+          .relics-seek::placeholder{ color: var(--muted); }
+          .action-btn{ padding: 10px 14px; border-radius: 11px; border: 1px solid var(--line-strong); background: rgba(21,24,39,0.75); color: var(--text); font-size: 13.5px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap: 7px; }
+          .action-btn:hover{ border-color: var(--accent); color: var(--accent); }
+          .action-btn svg{ width:15px; height:15px; }
+          .relics-count{ color: var(--muted); font-size: 13px; white-space:nowrap; }
+        
+          .source-menu{ position:relative; display:inline-flex; }
+          .sources-dropdown{ position:absolute; top: calc(100% + 10px); left: 0; z-index: 50; min-width: 210px; max-width: 86vw; background: rgba(26,22,37,0.96); border: 1px solid rgba(109,81,179,0.30); border-radius: 22px; padding: 10px; box-shadow: 0 18px 50px rgba(0,0,0,0.55); backdrop-filter: blur(10px); display:none; flex-direction:column; gap: 2px; }
+          .sources-dropdown.open{ display:flex; animation: drop-rise .16s ease both; }
+          @keyframes drop-rise{ from{ opacity:0; transform: translateY(-6px); } to{ opacity:1; transform: translateY(0); } }
+          .source-item{ display:block; width:100%; text-align:left; padding: 11px 16px; border-radius: 14px; border:none; background:transparent; color:#ffffff; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; transition: background .14s ease, color .14s ease; }
+          .source-item:hover{ color:#b9a8ff; }
+          .source-item.active{ background:#2c263d; color:#b9a8ff; }
+        
+          .relics-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; padding-bottom: 40px; }
+          .relic-card{ border: 1px solid var(--line); border-radius: 12px; background: rgba(16,19,31,0.7); overflow:hidden; cursor:pointer; text-align:left; padding:0; color: var(--text); display:flex; flex-direction:column; transition: transform .16s ease, border-color .16s ease; }
+          .relic-card:hover{ border-color: var(--accent); }
+          .relic-thumb{ width:100%; aspect-ratio: 16/10; object-fit: cover; background: var(--panel-2); display:block; }
+          .relic-meta{ padding: 10px 11px 12px 11px; }
+          .relic-meta h3{ margin:0; font-size: 13.5px; font-weight: 600; line-height:1.3; }
+          .relic-meta span{ display:block; margin-top: 4px; font-size: 11.5px; color: var(--muted); }
+          .relic-progress{ display:inline-flex; align-items:center; gap:5px; margin-top:7px; font-size:10.5px; color: var(--accent-2); font-weight:500; }
+          .relic-progress .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent-2); box-shadow: 0 0 6px var(--accent-2); }
+          .relics-status{ color: var(--muted); font-size: 14px; padding: 18px 2px 40px 2px; }
+          
+          #view-music{ position:relative; padding:0; overflow:hidden; background:#080a12; }
+          .music-topbar{ position:fixed; inset:0 0 auto 0; z-index:12; display:flex; align-items:center; justify-content:flex-end; min-height:0; padding:16px 20px; pointer-events:none; transition:transform .22s ease, opacity .22s ease; }
+          .music-topbar.hidden{ transform:translateY(-110%); opacity:0; pointer-events:none; }
+          .music-home-btn{ display:inline-flex; align-items:center; gap:7px; padding:10px 14px; border:1px solid rgba(255,255,255,0.24); border-radius:11px; background:rgba(10,13,24,0.72); color:var(--text); cursor:pointer; pointer-events:auto; font-size:12.5px; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); transition:all .15s ease; }
+          .music-home-btn:hover{ border-color:var(--accent); color:var(--accent); background:rgba(139,123,255,0.12); }
+          .music-home-btn svg{ width:15px; height:15px; }
+          .music-home-hotzone{ position:fixed; inset:0 0 auto 0; z-index:11; height:18px; pointer-events:auto; }
+          .music-sanctuary-wrap{ display:flex; flex-direction:column; width:100%; height:100vh; min-height:100vh; padding:0; }
+          .music-sanctuary-header{ display:none; }
+          .music-sanctuary-dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px rgba(139,123,255,0.9); }
+          .music-sanctuary-dot.ready{ background:var(--accent-2); box-shadow:0 0 10px rgba(79,224,196,0.9); }
+          .music-sanctuary-reload{ margin-left:auto; padding:7px 11px; border:1px solid var(--line-strong); border-radius:9px; background:rgba(16,19,31,0.68); color:var(--muted); cursor:pointer; font-size:11.5px; }
+          .music-sanctuary-reload:hover{ border-color:var(--accent); color:var(--text); }
+          .music-sanctuary-shell{ position:fixed; inset:0; z-index:1; width:100vw; height:100vh; min-height:100vh; max-width:none; margin:0; overflow:hidden; border:0; border-radius:0; background:#080a12; box-shadow:none; }
+          .music-sanctuary-frame{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#080a12; }
+          .music-sanctuary-loading{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:24px; background:radial-gradient(circle at 50% 42%, rgba(139,123,255,0.14), transparent 36%), rgba(8,10,18,0.94); color:var(--text); text-align:center; pointer-events:none; transition:opacity .35s ease; }
+          .music-sanctuary-loading.hidden{ opacity:0; }
+          .music-sanctuary-loading strong{ font-size:18px; font-weight:600; }
+          .music-sanctuary-loading span{ max-width:330px; color:var(--muted); font-size:12.5px; line-height:1.5; }
+          .music-loader{ width:27px; height:27px; margin-bottom:7px; border:2px solid rgba(139,123,255,0.26); border-top-color:var(--accent-2); border-radius:50%; animation:musicSpin .85s linear infinite; }
+          @keyframes musicSpin{ to{ transform:rotate(360deg); } }
+          @media (max-width: 720px){ .music-topbar{ padding:13px 14px; } .music-home-btn{ padding:9px 11px; } .music-home-btn span{ display:none; } }
+          .relic-player{ position: fixed; inset: 0; z-index: 60; background: #05060c; display:none; flex-direction: column; }
+          .relic-player.open{ display:flex; }
+          .player-bar{ display:flex; align-items:center; gap: 10px; padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap:wrap; }
+          .player-title{ font-size: 14.5px; font-weight: 600; margin-right:auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+          .player-saved{ font-size: 11.5px; color: var(--accent-2); display:inline-flex; align-items:center; gap:5px; }
+          .player-saved .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent-2); box-shadow: 0 0 6px var(--accent-2); }
+          .player-btn{ padding: 8px 13px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--panel-2); color: var(--text); font-size: 13px; cursor:pointer; white-space:nowrap; }
+          .player-btn:hover{ border-color: var(--accent); color: var(--accent); }
+          .player-frame-wrap{ flex:1; position:relative; background:#000; }
+          .player-frame-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+          .player-loading{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color: var(--muted); font-size: 14px; text-align:center; padding: 0 24px; }
+        
+          .app.chapel-mode .sidebar{ width:0; min-width:0; padding-left:0; padding-right:0; border-right:0; overflow:hidden; }
+          .app.chapel-mode .sidebar > *{ opacity:0; pointer-events:none; }
+          .app.chapel-mode .main{ width:100vw; }
+          .app.music-mode .sidebar{ width:0; min-width:0; padding-left:0; padding-right:0; border-right:0; overflow:hidden; }
+          .app.music-mode .sidebar > *{ opacity:0; pointer-events:none; }
+          .app.music-mode .main{ width:100vw; }
+          #view-chapel{ align-items:stretch; padding:0; overflow:hidden; background: radial-gradient(ellipse at 50% -18%, rgba(121,102,255,0.26), transparent 52%), linear-gradient(135deg, #07091a 0%, #0b1028 45%, #130c29 100%); }
+          #view-chapel > .view-header{ display:none; }
+          .chapel-omni{ flex:1; min-width:0; display:flex; align-items:center; gap: 9px; padding: 8px 13px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--panel-2); transition: border-color .18s ease, box-shadow .18s ease; }
+          .chapel-omni:focus-within{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,123,255,0.16); }
+          .chapel-omni-ico{ width:16px; height:16px; min-width:16px; color: var(--muted); }
+          .chapel-omni-ico svg{ width:16px; height:16px; display:block; }
+          .chapel-go{ border:none; cursor:pointer; padding: 9px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: #0a0d16; background: linear-gradient(120deg, var(--accent-2), var(--accent)); white-space:nowrap; }
+          .chapel-go:hover{ filter: brightness(1.08); }
+          .chapel-shortcuts{ display:none; }
+          .chapel-shortcut{ display:inline-flex; align-items:center; gap: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(21,24,39,0.7); color: var(--muted); font-size: 12.5px; font-weight: 500; cursor:pointer; white-space:nowrap; transition: border-color .15s ease, color .15s ease, background .15s ease; }
+          .chapel-shortcut:hover{ border-color: var(--line-strong); color: var(--text); background: var(--panel-2); }
+          .chapel-shortcut.add{ border-style:dashed; }
+          .chapel-shortcut svg{ width:14px; height:14px; display:block; }
+          .chapel-start{ position:absolute; inset:0; z-index:2; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 24px; background: radial-gradient(circle at 50% 42%, rgba(90,205,255,0.14) 0 1px, transparent 2px), radial-gradient(circle at 22% 24%, rgba(173,129,255,0.26), transparent 32%), radial-gradient(circle at 76% 70%, rgba(54,116,255,0.2), transparent 34%), linear-gradient(135deg, #080b21, #160d2d); background-size: 116px 116px, 100% 100%, 100% 100%, 100% 100%; }
+          .chapel-start.show{ display:flex; }
+          .chapel-start-mark{ width: 68px; height: 68px; border-radius: 22px; display:flex; align-items:center; justify-content:center; font-size: 29px; font-weight: 800; color:#090b20; background: linear-gradient(140deg, #71f5da, #8e7bff 62%, #d277ff); box-shadow: 0 0 0 1px rgba(255,255,255,0.22) inset, 0 18px 48px -14px rgba(139,123,255,0.95); }
+          .chapel-start h2{ margin: 16px 0 0 0; font-size: 22px; font-weight: 600; letter-spacing: 0.3px; }
+          .chapel-start p{ margin: 6px 0 0 0; font-size: 13px; color: var(--muted); }
+          .chapel-shell{ display:flex; flex-direction:column; flex:1 1 auto; min-height:0; width:100%; border:0; border-radius:0; overflow:hidden; background: rgba(7,9,26,0.72); backdrop-filter: blur(14px); box-shadow:none; }
+          .chapel-tabstrip{ display:flex; align-items:center; gap: 6px; padding: 9px 12px; background: linear-gradient(90deg, rgba(13,16,43,0.96), rgba(20,12,43,0.94)); border-bottom: 1px solid rgba(154,136,255,0.18); overflow-x:auto; box-shadow: 0 8px 28px rgba(0,0,0,0.18); }
+          .chapel-tabs{ display:flex; align-items:center; gap: 6px; }
+          .chapel-tab{ display:flex; align-items:center; gap: 8px; max-width: 200px; padding: 7px 10px; border-radius: 9px; background: transparent; border: 1px solid transparent; color: var(--muted); font-size: 12.5px; cursor:pointer; white-space:nowrap; }
+          .chapel-tab:hover{ background: rgba(255,255,255,0.04); color: var(--text); }
+          .chapel-tab.active{ background: var(--panel); border-color: var(--line-strong); color: var(--text); }
+          .chapel-tab .chapel-tab-title{ overflow:hidden; text-overflow:ellipsis; max-width: 150px; }
+          .chapel-tab .chapel-tab-x{ width:14px; height:14px; border:none; background:transparent; color: var(--muted); cursor:pointer; line-height:1; font-size: 13px; padding:0; }
+          .chapel-tab .chapel-tab-x:hover{ color: var(--text); }
+          .chapel-newtab{ width:26px; height:26px; min-width:26px; display:flex; align-items:center; justify-content:center; border-radius: 8px; border:none; background: transparent; color: var(--muted); cursor:pointer; }
+          .chapel-newtab:hover{ background: rgba(255,255,255,0.06); color: var(--text); }
+          .chapel-newtab svg{ width:15px; height:15px; }
+          .chapel-chrome{ display:flex; align-items:center; gap: 6px; padding: 9px 12px; background: rgba(9,11,30,0.94); border-bottom: 1px solid rgba(154,136,255,0.16); }
+          .chapel-btn{ width:30px; height:30px; min-width:30px; display:flex; align-items:center; justify-content:center; border-radius: 8px; border:none; background: transparent; color: var(--muted); cursor:pointer; }
+          .chapel-btn:hover{ background: rgba(139,123,255,0.16); color: #fff; }
+          .chapel-btn svg{ width:16px; height:16px; display:block; }
+          .chapel-url{ flex:1; min-width:0; padding:0; border:none; background: transparent; color: var(--text); font-size: 13px; outline:none; }
+          .chapel-url::placeholder{ color: var(--muted); }
+          .chapel-viewport{ position:relative; flex:1; min-height:0; background: radial-gradient(circle at 50% 35%, rgba(96,81,230,0.18), transparent 42%), #050714; }
+          .chapel-viewport iframe{ position:absolute; inset:0; z-index:1; width:100%; height:100%; border:0; display:none; background:#fff; }
+          .chapel-viewport iframe.chapel-active{ display:block; }
+          .chapel-status{ position:absolute; inset:0; z-index:3; display:none; align-items:center; justify-content:center; color: var(--muted); font-size: 13.5px; text-align:center; padding: 20px; background: rgba(11,14,24,0.94); pointer-events:none; }
+          .chapel-status.show{ display:flex; }
+          .chapel-shell.chapel-fs{ position:fixed; inset:0; z-index: 999; border-radius:0; border:none; background:#050714; animation: chapelFsIn .28s cubic-bezier(.22,.9,.3,1); }
+          @keyframes chapelFsIn{ from{ opacity:0; transform: scale(0.982); } to{ opacity:1; transform:none; } }
+          .chapel-shell.chapel-fs .chapel-tabstrip{ padding: 7px 10px; background: rgba(9,11,30,0.96); backdrop-filter: blur(8px); }
+          .chapel-shell.chapel-fs .chapel-chrome{ padding: 7px 10px; background: rgba(9,11,30,0.96); backdrop-filter: blur(8px); }
+          .chapel-shell.chapel-fs .chapel-viewport iframe{ background:#fff; }
+          .chapel-shell.chapel-results-fs{ position:fixed; inset:0; z-index:1000; border-radius:0; border:0; background:#000; }
+          .chapel-shell.chapel-results-fs .chapel-tabstrip,
+          .chapel-shell.chapel-results-fs .chapel-chrome{ display:none; }
+          .chapel-shell.chapel-results-fs .chapel-viewport{ background:#000; }
+          .chapel-results-exit{ position:absolute; top:14px; right:14px; z-index:8; width:36px; height:36px; display:none; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.22); border-radius:11px; background:rgba(8,10,24,0.72); color:#fff; cursor:pointer; backdrop-filter:blur(12px); box-shadow:0 8px 24px rgba(0,0,0,0.28); }
+          .chapel-results-exit:hover{ background:rgba(139,123,255,0.45); border-color:rgba(255,255,255,0.42); }
+          .chapel-results-exit svg{ width:17px; height:17px; }
+          .chapel-shell.chapel-results-fs .chapel-results-exit{ display:flex; }
+          .chapel-tabstrip, .chapel-chrome{ transition: background .2s ease; }
+          .chapel-tab{ transition: background .15s ease, color .15s ease, border-color .15s ease; }
+          .chapel-btn{ transition: background .15s ease, color .15s ease, transform .12s ease; }
+          .chapel-btn:active{ transform: scale(0.92); }
+          .chapel-url{ transition: color .18s ease; }
+          .chapel-go{ transition: filter .15s ease, transform .12s ease; }
+          .chapel-go:active{ transform: scale(0.96); }
+          .nav-item{ transition: background .15s ease, color .15s ease; }
+          .home-seek{ display:flex; align-items:center; gap: 11px; width: min(600px, 88vw); margin-top: 26px; padding: 0 18px; height: 54px; border-radius: 999px; border: 1px solid var(--line-strong); background: rgba(16,19,31,0.66); backdrop-filter: blur(12px); cursor:text; box-shadow: 0 14px 40px -26px rgba(0,0,0,0.95); transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+          .home-seek:focus-within{ border-color: rgba(139,123,255,0.6); background: rgba(16,19,31,0.84); box-shadow: 0 0 0 3px rgba(139,123,255,0.16), 0 16px 42px -22px rgba(139,123,255,0.5); }
+          .home-seek svg{ width:18px; height:18px; min-width:18px; color: var(--muted); display:block; transition: color .2s ease; }
+          .home-seek:focus-within svg{ color: var(--accent); }
+          .home-seek input{ flex:1; min-width:0; height:100%; background:transparent; border:none; outline:none; color: var(--text); font-size:15.5px; letter-spacing: 0.1px; }
+          .home-seek input::placeholder{ color: var(--muted); }
+          @media (max-width: 720px){ .chapel-chrome{ gap: 4px; padding: 7px 8px; } .chapel-btn{ width: 28px; min-width: 28px; } }
+
+           .announcement-overlay{ position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(4,6,14,0.30); backdrop-filter:blur(2px); animation:announcement-fade-in .22s ease both; }
+           .announcement-overlay.hidden{ display:none; }
+           @keyframes announcement-fade-in{ from{ opacity:0; } to{ opacity:1; } }
+           .announcement-card{ position:relative; width:min(590px, 100%); max-height:min(720px, calc(100vh - 48px)); overflow-y:auto; padding:32px 34px 27px; border:1px solid rgba(139,123,255,0.42); border-radius:22px; background:linear-gradient(145deg, rgba(22,25,46,0.90), rgba(13,16,31,0.88)); box-shadow:0 28px 90px rgba(0,0,0,0.46), 0 0 0 1px rgba(79,224,196,0.05) inset; animation:announcement-rise .3s cubic-bezier(.22,.9,.3,1) both; }
+           @keyframes announcement-rise{ from{ opacity:0; transform:translateY(12px) scale(.98); } to{ opacity:1; transform:none; } }
+           .announcement-card::before{ content:""; position:absolute; width:220px; height:220px; top:-120px; right:-80px; border-radius:50%; background:rgba(139,123,255,0.18); filter:blur(35px); pointer-events:none; }
+           .announcement-close{ position:absolute; top:14px; right:14px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border:1px solid transparent; border-radius:10px; background:transparent; color:var(--muted); cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease; }
+           .announcement-close:hover{ background:rgba(255,255,255,0.07); border-color:var(--line-strong); color:var(--text); }
+           .announcement-close svg{ width:17px; height:17px; }
+           .announcement-heading{ position:relative; display:flex; align-items:center; gap:13px; padding-right:30px; }
+           .announcement-mark{ width:42px; height:42px; min-width:42px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(139,123,255,0.42); border-radius:12px; color:var(--accent-2); background:rgba(139,123,255,0.11); }
+           .announcement-mark svg{ width:22px; height:22px; display:block; }
+           .announcement-eyebrow{ margin:0 0 3px; color:var(--accent-2); font-size:11px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; }
+           .announcement-title{ margin:0; color:var(--text); font-size:24px; font-weight:600; letter-spacing:.1px; }
+           .announcement-copy{ position:relative; margin:24px 0 0; color:#d8dbeb; font-size:14.5px; line-height:1.72; }
+           .announcement-copy strong{ color:var(--accent-2); font-weight:600; }
+           .announcement-footer{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:25px; padding-top:20px; border-top:1px solid var(--line); }
+           .announcement-check-label{ display:inline-flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; line-height:1.35; cursor:pointer; user-select:none; }
+           .announcement-check-label input{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+           .announcement-check{ width:19px; height:19px; min-width:19px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line-strong); border-radius:6px; background:var(--panel-2); transition:background .15s ease, border-color .15s ease, box-shadow .15s ease; }
+           .announcement-check svg{ width:13px; height:13px; color:#0a0d16; opacity:0; transform:scale(.7); transition:opacity .15s ease, transform .15s ease; }
+           .announcement-check-label input:checked + .announcement-check{ border-color:var(--accent-2); background:var(--accent-2); box-shadow:0 0 0 3px rgba(79,224,196,0.12); }
+           .announcement-check-label input:checked + .announcement-check svg{ opacity:1; transform:scale(1); }
+           .announcement-check-label input:focus-visible + .announcement-check{ outline:2px solid var(--accent); outline-offset:2px; }
+           .announcement-done{ padding:10px 17px; border:0; border-radius:10px; background:linear-gradient(120deg, var(--accent-2), var(--accent)); color:#0a0d16; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap; box-shadow:0 8px 22px rgba(79,224,196,0.14); transition:filter .15s ease, transform .12s ease; }
+           .announcement-done:hover{ filter:brightness(1.08); }
+           .announcement-done:active{ transform:scale(.97); }
+           @media (max-width: 560px){ .announcement-overlay{ padding:14px; } .announcement-card{ max-height:calc(100vh - 28px); padding:27px 22px 22px; border-radius:18px; } .announcement-title{ font-size:21px; } .announcement-copy{ margin-top:20px; font-size:14px; line-height:1.64; } .announcement-footer{ align-items:flex-start; flex-direction:column; gap:15px; } .announcement-done{ width:100%; } }
+    </style>
+    <link rel="stylesheet" href="./assets/ai.css">
+    <script src="./assets/media.js" defer></script>
+    <script src="./assets/ai.js" defer></script>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar collapsed" id="sidebar">
+    <div class="brand"><div class="brand-full">Nova</div></div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="home" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" data-view="relics" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7.5" width="19" height="10" rx="4"/><path d="M7 10.5v4"/><path d="M5 12.5h4"/><circle cx="16" cy="10.8" r="0.9" fill="currentColor" stroke="none"/><circle cx="18.2" cy="13" r="0.9" fill="currentColor" stroke="none"/></svg></span>
+        <span class="nav-label">Games</span>
+      </button>
+      <button class="nav-item" data-view="music" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span>
+        <span class="nav-label">Music</span>
+      </button>
+      <button class="nav-item" data-view="chapel" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.2 9h17.6"/><path d="M3.2 15h17.6"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg></span>
+        <span class="nav-label">Browser</span>
+      </button>
+      <a class="nav-item" href="https://sites.google.com/mymail.lausd.net/novaontop/home" target="_blank" rel="noopener noreferrer">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.33-1.33"/></svg></span>
+        <span class="nav-label">Links</span>
+      </a>
+      <button class="nav-item" data-view="oracle" type="button" title="Nova AI" aria-label="Nova AI">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6V4a3 3 0 0 1 6 0v2h2a3 3 0 0 1 3 3v1h1a2 2 0 0 1 0 4h-1v2a3 3 0 0 1-3 3h-2v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2H7a3 3 0 0 1-3-3v-2H3a2 2 0 0 1 0-4h1V9a3 3 0 0 1 3-3Z"/><circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/><path d="M9 15h6"/></svg></span>
+        <span class="nav-label">Nova AI</span>
+      </button>
+      <button class="nav-item" data-view="settings" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"/></svg></span>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="collapse-btn" id="collapseBtn" type="button">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span>
+        <span class="nav-label">Collapse</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <div class="texture-layer" id="textureLayer"></div>
+    <div class="view active" id="view-home">
+      <canvas id="starfield"></canvas>
+      <div class="home-content">
+        <h1 class="home-wordmark">Nova</h1>
+        <p class="home-tagline" id="homeTagline">Your space for games, your way.</p>
+        <a class="discord-pill" href="https://discord.gg/DpPH5sraz" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.54 2.12 5.25 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09.01.11-.53.31-1.07.56-1.64.78-.04.01-.05.05-.04.09.32.61.68 1.19 1.07 1.74.03.02.06.03.09.02 1.72-.53 3.46-1.33 5.26-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.83 2.12-1.89 2.12z"/></svg>
+          Discord
+        </a>
+        <form class="home-seek" id="homeSeekForm" autocomplete="off">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+          <input id="homeSeekInput" type="text" placeholder="Type a URL or search the web..." autocomplete="off" spellcheck="false">
+        </form>
+      </div>
+    </div>
+
+    <div class="view" id="view-relics">
+      <div class="view-header"><h1>Games</h1><p>Every game from GN Math and Noah's Tutoring Hub in one library — your progress saves automatically.</p></div>
+      <div class="relics-toolbar">
+        <input id="relicSeek" class="relics-seek" type="search" placeholder="Search games..." autocomplete="off">
+        <div class="source-menu">
+          <button class="action-btn" id="sourcesBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+            Game sources
+          </button>
+          <div class="sources-dropdown" id="sourcesDropdown"></div>
+        </div>
+        <span class="relics-count" id="relicCount"></span>
+      </div>
+      <div class="relics-grid" id="relicsGrid"></div>
+      <div class="relics-status" id="relicsStatus">Loading games...</div>
+    </div>
+
+    <div class="view" id="view-music">
+      <div class="music-topbar" id="musicTopbar">
+        <button class="music-home-btn" id="musicHomeBtn" type="button" title="Go home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
+          <span>Home</span>
+        </button>
+      </div>
+      <div class="music-home-hotzone" id="musicHomeHotzone" aria-hidden="true"></div>
+      <div class="music-sanctuary-wrap">
+        <div class="music-sanctuary-header"><span class="music-sanctuary-dot" id="musicSanctuaryDot"></span><span id="musicSanctuaryStatus">Connecting to SoundCloud through Nova's proxy…</span><button class="music-sanctuary-reload" id="musicSanctuaryReload" type="button">Reload SoundCloud</button></div>
+        <div class="music-sanctuary-shell">
+          <div class="music-sanctuary-loading" id="musicSanctuaryLoading">
+            <div class="music-loader"></div>
+            <strong>This may take a while.</strong>
+            <span>SoundCloud is loading through Nova's proxy. Please be patient while the connection starts.</span>
+          </div>
+          <iframe class="music-sanctuary-frame" id="musicSanctuaryFrame" title="SoundCloud through Nova proxy" allow="autoplay; fullscreen; microphone; camera; clipboard-write" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-chapel">
+      <div class="view-header"><h1>Browser</h1><p>Search the web without leaving Nova. Pages load right here inside the window.</p></div>
+      <div class="chapel-shell" id="chapelShell">
+        <div class="chapel-tabstrip">
+          <div class="chapel-tabs" id="chapelTabs"></div>
+          <button class="chapel-newtab" id="chapelNewTab" type="button" title="New tab" aria-label="New tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </button>
+        </div>
+        <div class="chapel-chrome">
+          <button class="chapel-btn" id="chapelBack" type="button" title="Back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button class="chapel-btn" id="chapelReload" type="button" title="Reload" aria-label="Reload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4h-4"/></svg></button>
+          <button class="chapel-btn" id="chapelHome" type="button" title="Home" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg></button>
+          <div class="chapel-omni">
+            <span class="chapel-omni-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></span>
+            <input class="chapel-url" id="chapelUrl" type="text" spellcheck="false" autocomplete="off" placeholder="Search or enter URL...">
+          </div>
+          <button class="chapel-go" id="chapelGo" type="button">Go</button>
+          <button class="chapel-btn" id="chapelFull" type="button" title="Fullscreen browser" aria-label="Fullscreen browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5"/><path d="M20 15v5h-5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/></svg></button>
+          <button class="chapel-btn" id="chapelResultsFull" type="button" title="Fullscreen search results" aria-label="Fullscreen search results"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6"/><path d="M4 4v6"/><path d="M20 20h-6"/><path d="M20 20v-6"/><path d="M20 4h-6"/><path d="M20 4v6"/><path d="M4 20h6"/><path d="M4 20v-6"/></svg></button>
+          <button class="chapel-btn" id="chapelClose" type="button" title="Close browser" aria-label="Close browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
+        </div>
+        <div class="chapel-shortcuts" aria-hidden="true">
+          <button class="chapel-shortcut" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></svg>Google</button>
+          <button class="chapel-shortcut" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="3.5"/><path d="M10.5 9.8l4.6 2.2-4.6 2.2z" fill="currentColor" stroke="none"/></svg>YouTube</button>
+          <button class="chapel-shortcut" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>Music</button>
+          <button class="chapel-shortcut" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16.5V20"/></svg>Classroom</button>
+        </div>
+        <div class="chapel-viewport" id="chapelViewport">
+          <button class="chapel-results-exit" id="chapelResultsExit" type="button" title="Exit search results fullscreen" aria-label="Exit search results fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5"/><path d="M15 20h5v-5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/></svg></button>
+          <div class="chapel-start show" id="chapelStart">
+            <div class="chapel-start-mark">N</div>
+            <h2>Nova</h2>
+            <p>Search or type a URL above</p>
+          </div>
+          <div class="chapel-status" id="chapelStatus"></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="view" id="view-oracle" aria-label="Nova AI chat">
+      <button class="oracle-drawer-backdrop" id="oracleDrawerBackdrop" type="button" aria-label="Close conversations" hidden></button>
+      <aside class="oracle-history" id="oracleHistory" aria-label="Chat history">
+        <div class="oracle-history-heading"><div class="oracle-brand"><span id="oracleHeaderRobot" class="oracle-avatar" aria-hidden="true"></span><span>Nova AI</span></div><button class="ghost-btn oracle-icon-btn" id="oracleSidebarClose" type="button" title="Collapse conversations" aria-label="Collapse conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></div>
+        <button class="ghost-btn oracle-new" id="oracleNew" type="button"><span aria-hidden="true">＋</span> New conversation</button>
+        <label class="oracle-seek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="oracleSeek" type="search" placeholder="Search conversations" aria-label="Search conversations"></label>
+        <p class="oracle-eyebrow">CONVERSATIONS</p>
+        <div id="oraclePrayers" class="oracle-prayer-list"></div>
+        <div class="oracle-sidebar-footer">
+          <button class="ghost-btn oracle-footer-btn" id="oracleSidebarTestament" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 5a4 4 0 0 0-7 2 4 4 0 0 0-1 7 4 4 0 0 0 8 4V5Zm0 0a4 4 0 0 1 7 2 4 4 0 0 1 1 7 4 4 0 0 1-8 4M8 9l4 2 4-2M7 15l5-2 5 2"/></svg>Memory<span id="oracleSidebarTestamentLabel">On</span></button>
+          <button class="ghost-btn oracle-footer-btn" id="oracleExport" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 15v5h14v-5"/></svg>Export chats &amp; memory</button>
+          <button class="ghost-btn oracle-footer-btn" id="oracleClear" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Delete all chats</button>
+          <button class="ghost-btn oracle-footer-btn" data-view="settings" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg>Nova settings</button>
+          <button class="ghost-btn oracle-footer-btn oracle-back-home" data-view="home" type="button">← Back to Nova</button>
+        </div>
+      </aside>
+      <div class="oracle-conversation">
+        <header class="oracle-header"><div class="oracle-header-title"><button class="ghost-btn oracle-icon-btn" id="oracleSidebarToggle" type="button" title="Show conversations" aria-label="Show conversations" aria-controls="oracleHistory" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 id="oracleConversationTitle">New conversation</h1></div><div class="oracle-actions"><button class="ghost-btn oracle-testament-pill" id="oracleTestamentOpen" type="button" title="Review automatic memory"><span class="oracle-live-dot" aria-hidden="true"></span><span id="oracleTestamentLabel">Memory on</span></button><button class="ghost-btn oracle-icon-btn" id="oracleRename" type="button" title="Rename conversation" aria-label="Rename conversation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m15 5 4 4M4 20l5-1L20 8a2.8 2.8 0 0 0-4-4L5 15z"/></svg></button><button class="ghost-btn oracle-icon-btn" id="oracleDelete" type="button" title="Delete conversation" aria-label="Delete conversation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg></button></div></header>
+        <dialog id="oracleTestamentDialog" class="oracle-dialog" aria-labelledby="oracleTestamentTitle">
+          <div class="oracle-actions"><h2 id="oracleTestamentTitle">What Nova remembers</h2><button class="ghost-btn" id="oracleTestamentClose" type="button" aria-label="Close memory">✕</button></div>
+          <p class="oracle-muted">Nova automatically keeps useful preferences and details from your conversations, on this device. Saved memory is included when you chat.</p>
+          <label class="oracle-check"><input id="oracleTestamentEnabled" type="checkbox" checked> Automatically remember &amp; use memory</label>
+          <div id="oracleTestament" class="oracle-testament-notes"></div>
+          <div id="oracleTestamentStatus" class="oracle-muted" role="status"></div>
+          <button class="ghost-btn" id="oracleClearTestament" type="button">Forget everything</button>
+        </dialog>
+        <dialog id="oracleAccessDialog" class="oracle-dialog" aria-labelledby="oracleAccessTitle">
+          <form id="oracleAccessForm"><h2 id="oracleAccessTitle">Enter the site access code</h2><p class="oracle-muted">This site's owner has enabled a shared access code.</p><label for="oracleAccessCode">Access code</label><input id="oracleAccessCode" type="password" autocomplete="off" required><div class="oracle-actions"><button class="ghost-btn" id="oracleAccessClose" type="button">Cancel</button><button class="ghost-btn" type="submit">Continue</button></div></form>
+        </dialog>
+        <div id="oracleScroll" class="oracle-scroll"><div class="oracle-content-column"><div id="oracleMessages" class="oracle-messages" role="log" aria-label="Conversation" aria-live="polite"></div><div class="oracle-feedback" id="oracleFeedback"><span id="oracleStatus" role="status"></span><button class="ghost-btn" id="oracleRetry" type="button" hidden>↻ Retry response</button></div></div></div>
+        <div class="oracle-composer-dock">
+        <p id="oracleStorageStatus" class="oracle-error" role="status"></p>
+        <div id="oracleScreenPreview" class="oracle-screen-preview" hidden><video id="oracleScreenVideo" autoplay muted playsinline></video><div><strong>Screen sharing</strong><p>Only the current frame is sent when you send a message. No audio is captured.</p></div><button class="ghost-btn" id="oracleScreenStop" type="button">Stop sharing</button></div>
+        <form id="oracleForm" class="oracle-composer">
+          <div id="oracleAttachments" class="oracle-attachments"></div>
+          <label class="oracle-sr-only" for="oraclePrompt">Message Nova AI</label>
+          <textarea id="oraclePrompt" rows="2" maxlength="12000" placeholder="Ask anything, or work through an idea…"></textarea>
+          <div class="oracle-media-toolbar"><input id="oracleImageFile" type="file" accept="image/jpeg,image/png,image/webp" hidden><button class="ghost-btn" id="oracleAddImage" type="button" title="Attach or paste an image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m4 18 5-5 4 3 4-6 4 7"/></svg>Image</button><button class="ghost-btn" id="oracleShareScreen" type="button" aria-pressed="false" title="Share a screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8m-4-5v5"/></svg>Screen</button></div>
+          <div class="oracle-composer-toolbar"><div class="oracle-scripture-controls"><label for="oracleScripture" class="oracle-sr-only">AI model</label><select id="oracleScripture" title="Choose the model for this conversation"><option value="">Site default</option></select><button class="ghost-btn oracle-scripture-refresh" id="oracleScripturesRefresh" type="button" title="Refresh available models" aria-label="Refresh available models">↻</button></div><div class="oracle-actions"><button class="ghost-btn" id="oracleStop" type="button" hidden>Stop</button><button class="ghost-btn oracle-send" id="oracleSend" type="submit" title="Send message" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button></div></div>
+        </form>
+        <p id="oracleScriptureStatus" class="oracle-scripture-status" role="status"></p>
+        <p id="oracleMediaStatus" class="oracle-scripture-status" role="status"></p>
+        <p id="oracleQuotaStatus" class="oracle-scripture-status" role="status"></p>
+        <div class="oracle-footnote"><span>Enter to send · Shift + Enter for a new line</span><span>AI can make mistakes.</span></div>
+        </div>
+      </div>
+    </section>
+    <div class="view" id="view-settings">
+      <div class="view-header"><h1>Settings</h1><p>Customize how Nova looks and behaves. Everything here saves automatically.</p></div>
+      <div class="settings-grid">
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.2" fill="currentColor" stroke="none"/></svg></span>Font</h2>
+          <p class="desc">Choose the typeface used across the site. Default is Outfit.</p>
+          <div class="font-options" id="fontOptions">
+            <button class="font-chip selected" data-font="'Outfit', sans-serif" style="font-family:'Outfit',sans-serif;" type="button">Default</button>
+            <button class="font-chip" data-font="'Space Mono', monospace" style="font-family:'Space Mono',monospace;" type="button">Space Mono</button>
+            <button class="font-chip" data-font="'Codystar', cursive" style="font-family:'Codystar',cursive;" type="button">Codystar</button>
+            <button class="font-chip" data-font="'Silkscreen', monospace" style="font-family:'Silkscreen',monospace;" type="button">Silkscreen</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/><path d="M3 12h18"/></svg></span>Theme</h2>
+          <p class="desc">Pick a background scene for the site, or upload your own wallpaper.</p>
+          <div class="theme-grid" id="themeGrid"></div>
+          <div class="custom-wallpaper-row">
+            <div class="label-block"><h3>Custom wallpaper</h3><p>Upload an image from your device. It saves in your browser and shows as the background.</p></div>
+            <div class="settings-btn-row">
+              <label class="ghost-btn" for="wallpaperUpload" style="cursor:pointer;">Upload image</label>
+              <input id="wallpaperUpload" type="file" accept="image/*" style="display:none">
+              <button class="ghost-btn" id="wallpaperRemove" type="button">Remove custom</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><path d="M7 7v10M17 7v10"/></svg></span>Tab Cloak</h2>
+          <p class="desc">Make Nova look like something harmless in your tab bar. Applies to new tabs Nova opens too.</p>
+          <div class="cloak-grid" id="cloakGrid"></div>
+          <div class="cloak-input-wrap">
+            <span class="chrome-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/><path d="M3 12h18"/></svg></span>
+            <input id="cloakTitleInput" type="text" placeholder="Custom tab title..." autocomplete="off">
+          </div>
+          <p class="cloak-hint" id="cloakHint">Current cloak: New Tab</p>
+          <div class="sub-toggle-row">
+            <div class="label-block"><h3>Auto cloak</h3><p>Disguise the tab only when you switch away — shows Nova while you're on it.</p></div>
+            <div class="switch" id="autoCloakToggle"></div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></span>Blob Cloak</h2>
+          <p class="desc">about:blank &rarr; blob</p>
+          <div class="toggle-row">
+            <div class="label-block"><h3>Open cloaked window as a blob URL</h3><p>When on, "Open in about:blank" loads the game through a private blob URL instead of a plain document.</p></div>
+            <div class="switch" id="blobCloakToggle"></div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.5-3 7.5-8 9-5-1.5-8-4.5-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span>Panic URL</h2>
+          <p class="desc">A safe page to jump to instantly. Press the panic key ( <kbd style="font-family:monospace;background:var(--panel-2);border:1px solid var(--line-strong);border-radius:5px;padding:1px 6px;font-size:11px;">`</kbd> backtick ) anywhere to flee.</p>
+          <div class="text-input-wrap">
+            <span class="lead-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.33-1.33"/></svg></span>
+            <input id="panicUrlInput" type="text" placeholder="https://classroom.google.com" autocomplete="off">
+          </div>
+          <div class="sub-toggle-row">
+            <div class="label-block"><h3>Panic key enabled</h3><p>Turn off to ignore the backtick key.</p></div>
+            <div class="switch on" id="panicKeyToggle"></div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.9H20l-4.9 3.6L17 18l-5-3.6L7 18l1.9-5.5L4 8.9h6.1z"/></svg></span>Leave-site warning</h2>
+          <p class="desc">Ask for confirmation before closing or navigating away from this tab. Browsers show their own standard warning text; it can't be customized.</p>
+          <div class="toggle-row">
+            <div class="label-block"><h3>Confirm before leaving</h3><p>Recommended if you don't want to lose your place by accident.</p></div>
+            <div class="switch" id="leaveWarningToggle"></div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h2><span class="section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M9 4h6v3H9z"/></svg></span>Game library data</h2>
+          <p class="desc">Nova caches the game list for 6 hours so it opens instantly. Refresh it if a source added new games. Your saved game progress is kept separately and is never cleared by refreshing the list.</p>
+          <div class="settings-btn-row">
+            <button class="ghost-btn" id="refreshLibraryBtn" type="button">Refresh game list</button>
+            <button class="ghost-btn" id="resetSettingsBtn" type="button">Reset all settings</button>
+            <button class="ghost-btn" id="clearProgressBtn" type="button">Clear saved progress</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="relic-player" id="relicPlayer">
+  <div class="player-bar">
+    <span class="player-title" id="playerTitle">Game</span>
+    <span class="player-saved" id="playerSaved" style="display:none;"><span class="dot"></span> Progress saving</span>
+    <button class="player-btn" id="playerFullscreen" type="button">Fullscreen</button>
+    <button class="player-btn" id="playerBlank" type="button">Open in about:blank</button>
+    <button class="player-btn" id="playerClose" type="button">Close</button>
+  </div>
+  <div class="player-frame-wrap" id="playerFrameWrap">
+    <div class="player-loading" id="playerLoading">Loading game...</div>
+  </div>
+</div>
+
+<div class="announcement-overlay hidden" id="announcementOverlay" aria-hidden="true">
+  <section class="announcement-card" role="dialog" aria-modal="true" aria-labelledby="announcementTitle">
+    <button class="announcement-close" id="announcementClose" type="button" aria-label="Close announcement" title="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
+    </button>
+    <div class="announcement-heading">
+      <div class="announcement-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 11 18-5v12L3 13v-2Z"/>
+          <path d="M11.6 16.8a3 3 0 1 1-5.2-2.6"/>
+          <path d="M21 9v6"/>
+        </svg>
+      </div>
+      <div>
+        <p class="announcement-eyebrow">Announcement</p>
+        <h2 class="announcement-title" id="announcementTitle">A quick message for Nova users</h2>
+      </div>
+    </div>
+    <p class="announcement-copy">Hi Nova Users thank you for using nova but we need your help nova doesn't have that much members so what I want you guys to do is make tiktoks, youtube, instagram videos. Share the links with your freinds brother idc anyone as long as he or she is alive this will help us as we could get more funds more funds = better features and links like s3 but we need money for that so help 😭 (also music may take a while to load be pateint and dont login or anything just play music click X on logins and stuff)</p>
+    <div class="announcement-footer">
+      <label class="announcement-check-label" for="announcementDontShow">
+        <input id="announcementDontShow" type="checkbox">
+        <span class="announcement-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 9.5 17 19 7.5"/></svg></span>
+        <span>Don't show this again</span>
+      </label>
+      <button class="announcement-done" id="announcementDone" type="button">Got it</button>
+    </div>
+  </section>
+</div>
+
+    <script>
+const covenant_ANNOUNCEMENT_KEY = "nova.announcement.dismissed.v1";
+const covenant_announcementOverlay = document.getElementById('announcementOverlay');
+const covenant_announcementClose = document.getElementById('announcementClose');
+const covenant_announcementDone = document.getElementById('announcementDone');
+const covenant_announcementDontShow = document.getElementById('announcementDontShow');
+function covenant_closeAnnouncement() {
+  if (covenant_announcementDontShow.checked) {
+    try {localStorage.setItem(covenant_ANNOUNCEMENT_KEY, '1');} catch (covenant_e) {}
+  }
+  covenant_announcementOverlay.classList.add('hidden');
+  covenant_announcementOverlay.setAttribute('aria-hidden', 'true');
+}
+function covenant_showAnnouncement() {
+  let covenant_dismissed = false;
+  try {covenant_dismissed = localStorage.getItem(covenant_ANNOUNCEMENT_KEY) === '1';} catch (covenant_e) {}
+  if (!covenant_dismissed) {
+    covenant_announcementOverlay.classList.remove('hidden');
+    covenant_announcementOverlay.setAttribute('aria-hidden', 'false');
+    covenant_announcementClose.focus();
+  }
+}
+covenant_announcementClose.addEventListener('click', covenant_closeAnnouncement);
+covenant_announcementDone.addEventListener('click', covenant_closeAnnouncement);
+covenant_announcementOverlay.addEventListener('click', (covenant_e) => {if (covenant_e.target === covenant_announcementOverlay) covenant_closeAnnouncement();});
+document.addEventListener('keydown', (covenant_e) => {
+  if (covenant_e.key === 'Escape' && !covenant_announcementOverlay.classList.contains('hidden')) covenant_closeAnnouncement();
+});
+covenant_showAnnouncement();
+
+const covenant_SETTINGS_KEY = "nova.settings.v3";
+const covenant_defaults = { font: "'Outfit', sans-serif", theme: 0, customWallpaper: "", useCustomWallpaper: false, cloak: "New Tab", customTitle: "", autoCloak: false, blobCloak: false, panicUrl: "", panicKey: true, leaveWarning: false };
+let covenant_S = Object.assign({}, covenant_defaults);
+try {const covenant_raw = localStorage.getItem(covenant_SETTINGS_KEY);if (covenant_raw) covenant_S = Object.assign({}, covenant_defaults, JSON.parse(covenant_raw));} catch (covenant_e) {}
+function covenant_saveSettings() {try {localStorage.setItem(covenant_SETTINGS_KEY, JSON.stringify(covenant_S));} catch (covenant_e) {console.warn("settings save failed", covenant_e);}}
+
+const covenant_TAGLINES = [
+"Your space for games, your way.",
+"The grind never ends",
+"Go follow my tiktok Infamous_hot.dog",
+"quick tip if you go to our discord you will never run out of links",
+"If you go to the links tab in our site and bookmark a lot you wont run out of links",
+"book mark this site https://sites.google.com/mymail.lausd.net/novaontop/home so you will never run out of links", "hhhhhh I come home so late and I barely have to focus on Nova",
+"God Loves you",
+"Quick Tip if your game doesn't load try opening it in about:blank",
+"Proverbs 16:24"];
+
+try {document.getElementById('homeTagline').textContent = covenant_TAGLINES[Math.floor(Math.random() * covenant_TAGLINES.length)];} catch (covenant_e) {}
+
+const covenant_navButtons = document.querySelectorAll('[data-view]');
+const covenant_views = document.querySelectorAll('.view');
+const covenant_navItemsInSidebar = document.querySelectorAll('.sidebar .nav-item');
+const covenant_appRoot = document.querySelector('.app');
+function covenant_goToView(covenant_name) {
+  covenant_views.forEach((covenant_v) => covenant_v.classList.toggle('active', covenant_v.id === 'view-' + covenant_name));
+  covenant_navItemsInSidebar.forEach((covenant_i) => covenant_i.classList.toggle('active', covenant_i.getAttribute('data-view') === covenant_name));
+  covenant_appRoot.classList.toggle("chapel-mode", covenant_name === "chapel");
+  covenant_appRoot.classList.toggle('music-mode', covenant_name === 'music');
+  covenant_appRoot.classList.toggle("oracle-mode", covenant_name === "oracle");
+  if (covenant_name !== "chapel") {
+    const covenant_chapelShell = document.getElementById("chapelShell");
+    if (covenant_chapelShell) covenant_chapelShell.classList.remove("chapel-fs", "chapel-results-fs");
+  }
+}
+covenant_navButtons.forEach((covenant_btn) => {covenant_btn.addEventListener('click', () => covenant_goToView(covenant_btn.getAttribute('data-view')));});
+const covenant_sidebar = document.getElementById('sidebar');
+document.getElementById('collapseBtn').addEventListener('click', () => {covenant_sidebar.classList.toggle('collapsed');});
+
+const covenant_fontChips = document.querySelectorAll('.font-chip');
+function covenant_applyFont(covenant_font) {document.documentElement.style.setProperty('--font-active', covenant_font);covenant_fontChips.forEach((covenant_c) => covenant_c.classList.toggle('selected', covenant_c.getAttribute('data-font') === covenant_font));}
+covenant_fontChips.forEach((covenant_chip) => {covenant_chip.addEventListener('click', () => {covenant_S.font = covenant_chip.getAttribute('data-font');covenant_saveSettings();covenant_applyFont(covenant_S.font);});});
+covenant_applyFont(covenant_S.font);
+
+function covenant_stars(covenant_seed, covenant_count, covenant_opacity) {let covenant_layers = [];let covenant_s = covenant_seed;function covenant_rand() {covenant_s = (covenant_s * 9301 + 49297) % 233280;return covenant_s / 233280;}for (let covenant_i = 0; covenant_i < covenant_count; covenant_i++) {const covenant_x = Math.floor(covenant_rand() * 300);const covenant_y = Math.floor(covenant_rand() * 300);const covenant_size = covenant_rand() > 0.85 ? 2 : 1;covenant_layers.push('radial-gradient(' + covenant_size + 'px ' + covenant_size + 'px at ' + covenant_x + 'px ' + covenant_y + 'px, rgba(255,255,255,' + covenant_opacity + '), transparent 100%)');}return covenant_layers.join(',');}
+const covenant_themes = [
+{ name: 'Deep Space', scene: 'radial-gradient(ellipse at 50% 0%, #1b2340 0%, #05060c 70%)', texture: { css: covenant_stars(1, 55, 0.9), size: '260px 260px' } },
+{ name: 'Aurora', scene: 'radial-gradient(ellipse 80% 50% at 30% 0%, rgba(79,224,196,0.35), transparent 60%), radial-gradient(ellipse 70% 50% at 70% 10%, rgba(139,123,255,0.35), transparent 60%), linear-gradient(180deg, #060812 0%, #0a0d16 60%)', texture: { css: covenant_stars(2, 35, 0.7), size: '260px 260px' } },
+{ name: 'Nebula', scene: 'radial-gradient(circle at 25% 30%, rgba(200,90,200,0.4), transparent 55%), radial-gradient(circle at 75% 65%, rgba(90,110,220,0.4), transparent 55%), linear-gradient(#05060c, #05060c)', texture: { css: covenant_stars(3, 40, 0.8), size: '260px 260px' } },
+{ name: 'Synthwave', scene: 'linear-gradient(180deg, #0a0820 0%, #1a0a3e 34%, #3a1054 54%, #6a1f5e 60%, #1a0d2e 60.1%, #0a0d16 100%)', texture: { css: 'radial-gradient(circle at 50% 60%, rgba(255,150,90,0.75) 0%, rgba(255,90,140,0.35) 14%, transparent 26%), repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 42px)', size: '100% 100%, 42px 42px', position: 'center, 0 0', repeat: 'no-repeat, repeat' } },
+{ name: 'Meteor Shower', scene: 'radial-gradient(ellipse at 30% 20%, #1a1f38 0%, #05060c 70%)', texture: { css: covenant_stars(4, 45, 0.85) + ', repeating-linear-gradient(115deg, rgba(255,255,255,0.12) 0 1px, transparent 1px 120px)', size: '260px 260px, 240px 240px' } },
+{ name: 'Night City', scene: 'linear-gradient(180deg, #0a0e1c 0%, #131a2e 55%, #1c2740 100%)', texture: { css: 'repeating-linear-gradient(90deg, rgba(0,0,0,0.55) 0 26px, transparent 26px 42px), radial-gradient(1px 1px at 10px 10px, rgba(255,220,140,0.9), transparent), radial-gradient(1px 1px at 32px 22px, rgba(255,220,140,0.9), transparent), radial-gradient(1px 1px at 16px 36px, rgba(255,220,140,0.9), transparent)', size: '42px 60px, 42px 60px, 42px 60px, 42px 60px', position: 'left bottom, left bottom, left bottom, left bottom', repeat: 'repeat-x, repeat-x, repeat-x, repeat-x' } },
+{ name: 'Ocean Depths', scene: 'radial-gradient(ellipse at 50% 100%, rgba(60,180,190,0.35), transparent 60%), radial-gradient(ellipse at 20% 20%, rgba(60,100,220,0.25), transparent 55%), linear-gradient(180deg, #04101a, #061826 60%, #04101a)', texture: { css: covenant_stars(5, 20, 0.4), size: '260px 260px' } },
+{ name: 'Golden Nova', scene: 'radial-gradient(circle at 50% 45%, rgba(255,200,120,0.55), transparent 55%), radial-gradient(circle at 50% 45%, rgba(255,140,90,0.3), transparent 70%), linear-gradient(#0a0d16, #0a0d16)', texture: { css: covenant_stars(6, 25, 0.5), size: '260px 260px' } },
+{ name: 'Frozen Peaks', scene: 'linear-gradient(to top, rgba(120,150,210,0.55) 0%, rgba(120,150,210,0) 40%), linear-gradient(15deg, rgba(90,120,190,0.35) 0%, rgba(90,120,190,0) 48%), linear-gradient(180deg, #0c1830, #060a16 65%)', texture: { css: covenant_stars(7, 30, 0.7), size: '260px 260px' } }];
+
+const covenant_themeGrid = document.getElementById('themeGrid');
+const covenant_mainEl = document.getElementById('main');
+const covenant_textureEl = document.getElementById('textureLayer');
+
+function covenant_applyGradientTheme(covenant_theme) {
+  covenant_mainEl.style.backgroundImage = covenant_theme.scene;
+  covenant_mainEl.style.backgroundSize = '100% 100%';
+  covenant_mainEl.style.backgroundPosition = 'center';
+  covenant_mainEl.style.backgroundRepeat = 'no-repeat';
+  if (covenant_theme.texture) {
+    covenant_textureEl.style.backgroundImage = covenant_theme.texture.css;
+    covenant_textureEl.style.backgroundSize = covenant_theme.texture.size;
+    covenant_textureEl.style.backgroundPosition = covenant_theme.texture.position || '0 0';
+    covenant_textureEl.style.backgroundRepeat = covenant_theme.texture.repeat || 'repeat';
+  } else {
+    covenant_textureEl.style.backgroundImage = 'none';
+  }
+}
+function covenant_applyCustomWallpaper() {
+  if (covenant_S.useCustomWallpaper && covenant_S.customWallpaper) {
+    covenant_mainEl.style.backgroundImage = "url('" + covenant_S.customWallpaper.replace(/'/g, "\\'") + "')";
+    covenant_mainEl.style.backgroundSize = 'cover';
+    covenant_mainEl.style.backgroundPosition = 'center';
+    covenant_mainEl.style.backgroundRepeat = 'no-repeat';
+    covenant_textureEl.style.backgroundImage = 'none';
+    covenant_mainEl.classList.add('custom-bg');
+  } else {
+    covenant_mainEl.classList.remove('custom-bg');
+    covenant_applyGradientTheme(covenant_themes[covenant_S.theme] || covenant_themes[0]);
+  }
+}
+function covenant_updateSwatchSelection() {
+  const covenant_swatches = document.querySelectorAll('.theme-swatch');
+  covenant_swatches.forEach((covenant_s, covenant_i) => {
+    const covenant_isCustom = covenant_i === covenant_themes.length;
+    covenant_s.classList.toggle('selected', covenant_isCustom ? covenant_S.useCustomWallpaper : (!covenant_S.useCustomWallpaper && covenant_i === covenant_S.theme));
+  });
+}
+covenant_themes.forEach((covenant_theme, covenant_i) => {
+  const covenant_el = document.createElement('div');
+  covenant_el.className = 'theme-swatch' + (covenant_i === covenant_S.theme && !covenant_S.useCustomWallpaper ? ' selected' : '');
+  covenant_el.style.backgroundImage = covenant_theme.scene;covenant_el.style.backgroundSize = '100% 100%';covenant_el.style.backgroundPosition = 'center';covenant_el.style.backgroundRepeat = 'no-repeat';
+  covenant_el.innerHTML = '<span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="theme-name">' + covenant_theme.name + '</span>';
+  covenant_el.addEventListener('click', () => {covenant_S.theme = covenant_i;covenant_S.useCustomWallpaper = false;covenant_saveSettings();covenant_applyCustomWallpaper();covenant_updateSwatchSelection();});
+  covenant_themeGrid.appendChild(covenant_el);
+});
+const covenant_customSwatch = document.createElement('div');
+covenant_customSwatch.className = 'theme-swatch' + (covenant_S.useCustomWallpaper ? ' selected' : '');
+if (covenant_S.customWallpaper) {covenant_customSwatch.style.backgroundImage = "url('" + covenant_S.customWallpaper.replace(/'/g, "\\'") + "')";covenant_customSwatch.style.backgroundSize = 'cover';covenant_customSwatch.style.backgroundPosition = 'center';} else
+{covenant_customSwatch.style.background = 'var(--panel-2)';}
+covenant_customSwatch.innerHTML = '<span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="theme-name">Custom</span>';
+covenant_customSwatch.addEventListener('click', () => {
+  if (!covenant_S.customWallpaper) {document.getElementById('wallpaperUpload').click();return;}
+  covenant_S.useCustomWallpaper = true;covenant_saveSettings();covenant_applyCustomWallpaper();covenant_updateSwatchSelection();
+});
+covenant_themeGrid.appendChild(covenant_customSwatch);
+
+covenant_applyCustomWallpaper();
+
+const covenant_wallpaperUpload = document.getElementById('wallpaperUpload');
+const covenant_wallpaperRemove = document.getElementById('wallpaperRemove');
+covenant_wallpaperUpload.addEventListener('change', (covenant_e) => {
+  const covenant_file = covenant_e.target.files && covenant_e.target.files[0];
+  if (!covenant_file) return;
+  if (!covenant_file.type || !covenant_file.type.startsWith('image/')) {alert('Please choose an image file.');covenant_e.target.value = '';return;}
+  const covenant_reader = new FileReader();
+  covenant_reader.onload = () => {
+    const covenant_img = new Image();
+    covenant_img.onload = () => {
+      const covenant_maxW = 1920;
+      const covenant_scale = Math.min(1, covenant_maxW / (covenant_img.width || covenant_maxW));
+      const covenant_w = Math.max(1, Math.round((covenant_img.width || 1) * covenant_scale));
+      const covenant_h = Math.max(1, Math.round((covenant_img.height || 1) * covenant_scale));
+      let covenant_dataUrl;
+      try {
+        const covenant_c = document.createElement('canvas');
+        covenant_c.width = covenant_w;covenant_c.height = covenant_h;
+        const covenant_cx = covenant_c.getContext('2d');
+        covenant_cx.drawImage(covenant_img, 0, 0, covenant_w, covenant_h);
+        covenant_dataUrl = covenant_c.toDataURL('image/jpeg', 0.85);
+      } catch (covenant_err) {covenant_dataUrl = covenant_reader.result;}
+      try {
+        covenant_S.customWallpaper = covenant_dataUrl;
+        covenant_S.useCustomWallpaper = true;
+        covenant_saveSettings();
+      } catch (covenant_err) {
+        alert('That image is too large to save in your browser. Try a smaller or simpler image.');
+        covenant_e.target.value = '';
+        return;
+      }
+      covenant_customSwatch.style.backgroundImage = "url('" + covenant_S.customWallpaper.replace(/'/g, "\\'") + "')";
+      covenant_customSwatch.style.backgroundSize = 'cover';
+      covenant_customSwatch.style.backgroundPosition = 'center';
+      covenant_customSwatch.style.background = '';
+      covenant_applyCustomWallpaper();
+      covenant_updateSwatchSelection();
+      covenant_e.target.value = '';
+    };
+    covenant_img.onerror = () => {alert('Could not read that image. Try a different file.');covenant_e.target.value = '';};
+    covenant_img.src = covenant_reader.result;
+  };
+  covenant_reader.onerror = () => {alert('Could not read that file.');covenant_e.target.value = '';};
+  covenant_reader.readAsDataURL(covenant_file);
+});
+covenant_wallpaperRemove.addEventListener('click', () => {
+  covenant_S.customWallpaper = '';
+  covenant_S.useCustomWallpaper = false;
+  covenant_saveSettings();
+  covenant_customSwatch.style.backgroundImage = '';
+  covenant_customSwatch.style.background = 'var(--panel-2)';
+  covenant_applyCustomWallpaper();
+  covenant_updateSwatchSelection();
+});
+
+function covenant_favIcon(covenant_domain) {return 'https://www.google.com/s2/favicons?domain=' + covenant_domain + '&sz=64';}
+const covenant_CHROME_TAB_SVG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ffffff"/><circle cx="12" cy="12" r="7" fill="none" stroke="#4285f4" stroke-width="1.6"/><path d="M12 5a7 7 0 0 0 0 14" fill="none" stroke="#ea4335" stroke-width="1.6"/><path d="M5 12h14" fill="none" stroke="#fbbc04" stroke-width="1.6"/><path d="M12 5a7 7 0 0 1 6 5H6a7 7 0 0 1 6-5z" fill="none" stroke="#34a853" stroke-width="1.6"/></svg>');
+
+const covenant_CLOAK_PRESETS = [
+{ name: 'Nova', title: 'Nova', favicon: covenant_CHROME_TAB_SVG },
+{ name: 'Google', title: 'Google', favicon: covenant_favIcon('google.com') },
+{ name: 'Classroom', title: 'Home', favicon: covenant_favIcon('classroom.google.com') },
+{ name: 'Clever', title: 'Clever | Portal', favicon: covenant_favIcon('clever.com') },
+{ name: 'Desmos', title: 'Desmos | Graphing Calculator', favicon: covenant_favIcon('desmos.com') },
+{ name: 'Wikipedia', title: 'Wikipedia, the free encyclopedia', favicon: covenant_favIcon('wikipedia.org') },
+{ name: 'Gmail', title: 'Inbox (1) - Gmail', favicon: covenant_favIcon('mail.google.com') },
+{ name: 'Drive', title: 'My Drive - Google Drive', favicon: covenant_favIcon('drive.google.com') },
+{ name: 'New Tab', title: 'New Tab', favicon: covenant_CHROME_TAB_SVG },
+{ name: 'Bing', title: 'Bing', favicon: covenant_favIcon('bing.com') }];
+
+const covenant_DEFAULT_FAVICON = covenant_CHROME_TAB_SVG;
+const covenant_cloakGrid = document.getElementById('cloakGrid');
+const covenant_cloakTitleInput = document.getElementById('cloakTitleInput');
+const covenant_cloakHint = document.getElementById('cloakHint');
+const covenant_autoCloakToggle = document.getElementById('autoCloakToggle');
+const covenant_blobCloakToggle = document.getElementById('blobCloakToggle');
+const covenant_panicUrlInput = document.getElementById('panicUrlInput');
+const covenant_panicKeyToggle = document.getElementById('panicKeyToggle');
+const covenant_leaveToggle = document.getElementById('leaveWarningToggle');
+
+function covenant_cloakIndex() {const covenant_i = covenant_CLOAK_PRESETS.findIndex((covenant_p) => covenant_p.name === covenant_S.cloak);return covenant_i < 0 ? covenant_CLOAK_PRESETS.findIndex((covenant_p) => covenant_p.name === 'New Tab') : covenant_i;}
+function covenant_setFavicon(covenant_url) {document.querySelectorAll("link[rel~='icon']").forEach((covenant_l) => covenant_l.remove());const covenant_link = document.createElement('link');covenant_link.rel = 'icon';covenant_link.href = covenant_url || covenant_DEFAULT_FAVICON;document.head.appendChild(covenant_link);}
+function covenant_activeCloak() {const covenant_preset = covenant_CLOAK_PRESETS[covenant_cloakIndex()];const covenant_custom = (covenant_S.customTitle || '').trim();return { title: covenant_custom || covenant_preset.title, favicon: covenant_preset.favicon, name: covenant_custom ? 'custom title' : covenant_preset.name };}
+function covenant_renderCloakState() {
+  const covenant_cur = covenant_activeCloak();
+  if (covenant_S.autoCloak && !document.hidden) {document.title = 'Nova';covenant_setFavicon(covenant_CHROME_TAB_SVG);} else
+  {document.title = covenant_cur.title;covenant_setFavicon(covenant_cur.favicon);}
+  covenant_cloakHint.textContent = 'Current cloak: ' + covenant_cur.name + (covenant_S.autoCloak ? ' (only while you are away)' : '');
+  document.querySelectorAll('.cloak-chip').forEach((covenant_c, covenant_i) => covenant_c.classList.toggle('selected', covenant_i === covenant_cloakIndex()));
+}
+function covenant_renderCloakGrid() {
+  covenant_cloakGrid.innerHTML = '';
+  covenant_CLOAK_PRESETS.forEach((covenant_preset, covenant_i) => {
+    const covenant_chip = document.createElement('button');
+    covenant_chip.type = 'button';
+    covenant_chip.className = 'cloak-chip';
+    const covenant_ico = document.createElement('span');
+    covenant_ico.className = 'cloak-ico';
+    const covenant_img = document.createElement('img');
+    covenant_img.src = covenant_preset.favicon;covenant_img.alt = '';
+    covenant_img.addEventListener('error', () => {covenant_ico.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/></svg>';});
+    covenant_ico.appendChild(covenant_img);
+    const covenant_label = document.createElement('span');
+    covenant_label.textContent = covenant_preset.name;
+    covenant_chip.appendChild(covenant_ico);covenant_chip.appendChild(covenant_label);
+    covenant_chip.addEventListener('click', () => {covenant_S.cloak = covenant_preset.name;covenant_saveSettings();covenant_renderCloakState();});
+    covenant_cloakGrid.appendChild(covenant_chip);
+  });
+}
+covenant_renderCloakGrid();
+covenant_cloakTitleInput.value = covenant_S.customTitle || '';
+covenant_panicUrlInput.value = covenant_S.panicUrl || '';
+covenant_autoCloakToggle.classList.toggle('on', !!covenant_S.autoCloak);
+covenant_blobCloakToggle.classList.toggle('on', !!covenant_S.blobCloak);
+covenant_panicKeyToggle.classList.toggle('on', !!covenant_S.panicKey);
+covenant_leaveToggle.classList.toggle('on', !!covenant_S.leaveWarning);
+covenant_renderCloakState();
+
+covenant_cloakTitleInput.addEventListener('input', () => {covenant_S.customTitle = covenant_cloakTitleInput.value;covenant_saveSettings();covenant_renderCloakState();});
+covenant_autoCloakToggle.addEventListener('click', () => {covenant_S.autoCloak = !covenant_S.autoCloak;covenant_saveSettings();covenant_autoCloakToggle.classList.toggle('on', covenant_S.autoCloak);covenant_renderCloakState();});
+document.addEventListener('visibilitychange', covenant_renderCloakState);
+covenant_blobCloakToggle.addEventListener('click', () => {covenant_S.blobCloak = !covenant_S.blobCloak;covenant_saveSettings();covenant_blobCloakToggle.classList.toggle('on', covenant_S.blobCloak);});
+covenant_panicUrlInput.addEventListener('input', () => {covenant_S.panicUrl = covenant_panicUrlInput.value.trim();covenant_saveSettings();});
+covenant_panicKeyToggle.addEventListener('click', () => {covenant_S.panicKey = !covenant_S.panicKey;covenant_saveSettings();covenant_panicKeyToggle.classList.toggle('on', covenant_S.panicKey);});
+covenant_leaveToggle.addEventListener('click', () => {covenant_S.leaveWarning = !covenant_S.leaveWarning;covenant_saveSettings();covenant_leaveToggle.classList.toggle('on', covenant_S.leaveWarning);});
+
+function covenant_triggerPanic() {let covenant_url = covenant_S.panicUrl || 'https://classroom.google.com';if (!/^https?:\/\//i.test(covenant_url)) covenant_url = 'https://' + covenant_url;covenant_S.leaveWarning = false;try {window.location.replace(covenant_url);} catch (covenant_e) {window.location.href = covenant_url;}}
+document.addEventListener('keydown', (covenant_e) => {
+  if (!covenant_S.panicKey) return;
+  const covenant_t = covenant_e.target;
+  if (covenant_t && (covenant_t.tagName === 'INPUT' || covenant_t.tagName === 'TEXTAREA' || covenant_t.isContentEditable)) return;
+  if (covenant_e.key === '`' || covenant_e.code === 'Backquote') {covenant_e.preventDefault();covenant_triggerPanic();}
+});
+window.addEventListener('beforeunload', (covenant_e) => {
+  if (covenant_currentRelic) covenant_saveRelicProgress(covenant_currentRelic);
+  if (!covenant_S.leaveWarning) return;
+  covenant_e.preventDefault();covenant_e.returnValue = '';
+});
+
+function covenant_openCloakedWindow(covenant_html, covenant_titleFallback) {
+  const covenant_win = window.open('about:blank', '_blank');
+  if (!covenant_win) {return null;}
+  const covenant_cur = covenant_activeCloak();
+  try {
+    if (covenant_S.blobCloak) {
+      const covenant_blob = new Blob([covenant_html], { type: 'text/html' });
+      const covenant_blobUrl = URL.createObjectURL(covenant_blob);
+      covenant_win.document.open();covenant_win.document.write('<!DOCTYPE html><html><head><title></title></head><body style="margin:0;background:#000"><iframe style="position:fixed;inset:0;width:100%;height:100%;border:0" allow="autoplay; fullscreen; gamepad; clipboard-write; pointer-lock" allowfullscreen></iframe></body></html>');covenant_win.document.close();
+      covenant_win.document.querySelector('iframe').src = covenant_blobUrl;
+    } else {
+      covenant_win.document.open();covenant_win.document.write(covenant_html);covenant_win.document.close();
+    }
+    covenant_win.document.title = covenant_cur.title || covenant_titleFallback || 'New Tab';
+    const covenant_link = covenant_win.document.createElement('link');covenant_link.rel = 'icon';covenant_link.href = covenant_cur.favicon || covenant_DEFAULT_FAVICON;covenant_win.document.head.appendChild(covenant_link);
+  } catch (covenant_e) {console.warn('cloaked window failed', covenant_e);}
+  return covenant_win;
+}
+
+const covenant_GNMATH_ZONES = "https://raw.githubusercontent.com/gn-math/assets/main/zones.json";
+const covenant_GNMATH_HTML = "https://raw.githubusercontent.com/gn-math/html/main";
+const covenant_GNMATH_COVERS = "https://raw.githubusercontent.com/gn-math/covers/main";
+const covenant_GNMATH_FILES_API = "https://api.github.com/repos/gn-math/html/contents";
+const covenant_NOAH_RELICS_JS = "https://raw.githubusercontent.com/NoahsAmazingTutoringHelp/Noahs-Calculus-Tutor/master/games.js";
+
+const covenant_BLOCKED_TITLES = ["ovo 2", "ovo 3", "ovo2", "ovo3"];
+
+async function covenant_loadGnMathFileMap() {
+  try {
+    const covenant_res = await fetch(covenant_GNMATH_FILES_API + "?t=" + Date.now());
+    if (!covenant_res.ok) throw new Error("file list " + covenant_res.status);
+    const covenant_list = await covenant_res.json();
+    const covenant_map = {};
+    covenant_list.forEach((covenant_item) => {if (covenant_item.type !== "file" || !covenant_item.name.endsWith(".html")) return;const covenant_base = covenant_item.name.replace(/\.html$/, "");const covenant_id = covenant_base.split("-")[0];if (/^\d+$/.test(covenant_id) && !(covenant_id in covenant_map)) covenant_map[covenant_id] = covenant_item.name;});
+    return covenant_map;
+  } catch (covenant_e) {console.warn("GN Math file map failed", covenant_e);return {};}
+}
+async function covenant_loadGnMath() {
+  const [covenant_zonesRes, covenant_fileMap] = await Promise.all([fetch(covenant_GNMATH_ZONES + "?t=" + Date.now()), covenant_loadGnMathFileMap()]);
+  if (!covenant_zonesRes.ok) throw new Error("GN Math list " + covenant_zonesRes.status);
+  const covenant_zones = await covenant_zonesRes.json();
+  return covenant_zones.filter((covenant_z) => covenant_z && covenant_z.name && covenant_z.url && !covenant_z.name.startsWith("[!]")).map((covenant_z) => {
+    const covenant_isExternal = /^https?:/i.test(covenant_z.url);
+    let covenant_url;
+    if (covenant_isExternal) {covenant_url = covenant_z.url;} else
+    {const covenant_idKey = String(covenant_z.id);const covenant_file = covenant_fileMap[covenant_idKey] || (covenant_idKey + ".html");covenant_url = covenant_GNMATH_HTML + "/" + covenant_file;}
+    return { title: covenant_z.name, source: "gnmath", sourceName: "GN Math", external: covenant_isExternal, url: covenant_url, image: (covenant_z.cover || "").replace("{COVER_URL}", covenant_GNMATH_COVERS).replace("{HTML_URL}", covenant_GNMATH_HTML), author: covenant_z.author || "" };
+  });
+}
+async function covenant_loadNoah() {
+  const covenant_res = await fetch(covenant_NOAH_RELICS_JS + "?t=" + Date.now());
+  if (!covenant_res.ok) throw new Error("Noah's list " + covenant_res.status);
+  const covenant_text = await covenant_res.text();
+  const covenant_list = new Function(covenant_text + "; return typeof games !== 'undefined' ? games : [];")();
+  return covenant_list.filter((covenant_g) => covenant_g && covenant_g.title && covenant_g.url).map((covenant_g) => ({ title: covenant_g.title, source: "noah", sourceName: "Noah's Tutoring Hub", external: false, url: covenant_g.url, image: covenant_g.image || "", author: "" }));
+}
+
+const covenant_SOURCES = [
+{ id: "gnmath", name: "GN Math", site: "https://gn-math.github.io", feed: covenant_GNMATH_ZONES, loader: covenant_loadGnMath },
+{ id: "noah", name: "Noah's Tutoring Hub", site: "https://noahsamazingtutoringhelp.github.io/Noahs-Calculus-Tutor/", feed: covenant_NOAH_RELICS_JS, loader: covenant_loadNoah }];
+
+
+const covenant_CACHE_KEY = "nova.gameLibrary.v4";
+const covenant_CACHE_TTL = 1000 * 60 * 60 * 6;
+let covenant_allRelics = [],covenant_filteredRelics = [],covenant_renderedCount = 0;
+const covenant_PAGE_SIZE = 60;
+let covenant_activeSource = "all";
+const covenant_relicsGrid = document.getElementById("relicsGrid");
+const covenant_relicsStatus = document.getElementById("relicsStatus");
+const covenant_relicCountEl = document.getElementById("relicCount");
+const covenant_relicSeek = document.getElementById("relicSeek");
+const covenant_relicsView = document.getElementById("view-relics");
+
+const covenant_sourcesDropdown = document.getElementById('sourcesDropdown');
+const covenant_sourcesBtn = document.getElementById('sourcesBtn');
+function covenant_renderSourceDropdown() {
+  covenant_sourcesDropdown.innerHTML = '';
+  const covenant_items = [{ id: 'all', name: 'All' }].concat(covenant_SOURCES.map((covenant_s) => ({ id: covenant_s.id, name: covenant_s.name })));
+  covenant_items.forEach((covenant_t) => {
+    const covenant_b = document.createElement('button');
+    covenant_b.type = 'button';
+    covenant_b.className = 'source-item' + (covenant_t.id === covenant_activeSource ? ' active' : '');
+    covenant_b.textContent = covenant_t.name;
+    covenant_b.addEventListener('click', (covenant_ev) => {covenant_ev.stopPropagation();covenant_activeSource = covenant_t.id;covenant_renderSourceDropdown();covenant_applyFilters();covenant_closeDropdown();});
+    covenant_sourcesDropdown.appendChild(covenant_b);
+  });
+}
+function covenant_openDropdown() {covenant_sourcesDropdown.classList.add('open');}
+function covenant_closeDropdown() {covenant_sourcesDropdown.classList.remove('open');}
+covenant_sourcesBtn.addEventListener('click', (covenant_e) => {covenant_e.stopPropagation();covenant_sourcesDropdown.classList.toggle('open');});
+document.addEventListener('click', (covenant_e) => {if (!covenant_sourcesDropdown.contains(covenant_e.target) && covenant_e.target !== covenant_sourcesBtn) covenant_closeDropdown();});
+document.addEventListener('keydown', (covenant_e) => {if (covenant_e.key === 'Escape') covenant_closeDropdown();});
+covenant_renderSourceDropdown();
+
+function covenant_normalizeTitle(covenant_t) {return covenant_t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\b(unblocked|game|html5?)\b/g, '').trim();}
+function covenant_cleanLibrary(covenant_relics) {
+  const covenant_seen = new Map();
+  covenant_relics.forEach((covenant_g) => {
+    if (!covenant_g || !covenant_g.title || !covenant_g.url) return;
+    const covenant_title = covenant_g.title.trim();
+    if (!covenant_title || covenant_title.startsWith('[!]')) return;
+    const covenant_norm = covenant_normalizeTitle(covenant_title);
+    if (!covenant_norm) return;
+    if (covenant_BLOCKED_TITLES.indexOf(covenant_norm) !== -1) return;
+    const covenant_prev = covenant_seen.get(covenant_norm);
+    if (!covenant_prev) {covenant_seen.set(covenant_norm, covenant_g);return;}
+    const covenant_score = (covenant_x) => (covenant_x.external ? 0 : 2) + (covenant_x.image ? 1 : 0);
+    if (covenant_score(covenant_g) > covenant_score(covenant_prev)) covenant_seen.set(covenant_norm, covenant_g);
+  });
+  return Array.from(covenant_seen.values()).sort((covenant_a, covenant_b) => covenant_a.title.localeCompare(covenant_b.title));
+}
+
+function covenant_readCache() {try {const covenant_raw = localStorage.getItem(covenant_CACHE_KEY);if (!covenant_raw) return null;const covenant_parsed = JSON.parse(covenant_raw);if (!covenant_parsed.time || Date.now() - covenant_parsed.time > covenant_CACHE_TTL) return null;if (!Array.isArray(covenant_parsed.games) || !covenant_parsed.games.length) return null;return covenant_parsed.games;} catch (covenant_e) {return null;}}
+function covenant_writeCache(covenant_relics) {try {localStorage.setItem(covenant_CACHE_KEY, JSON.stringify({ time: Date.now(), games: covenant_relics }));} catch (covenant_e) {}}
+function covenant_setStatus(covenant_msg) {covenant_relicsStatus.textContent = covenant_msg || "";covenant_relicsStatus.style.display = covenant_msg ? "block" : "none";}
+
+const covenant_PROGRESS_PREFIX = "nova.progress.";
+function covenant_progressKeyFor(covenant_relic) {return covenant_PROGRESS_PREFIX + covenant_relic.source + ":" + covenant_normalizeTitle(covenant_relic.title);}
+function covenant_isNovaKey(covenant_k) {return covenant_k === covenant_SETTINGS_KEY || covenant_k === covenant_CACHE_KEY || covenant_k.startsWith(covenant_PROGRESS_PREFIX) || covenant_k.startsWith("nova.");}
+function covenant_getRelicKeys() {const covenant_out = [];for (let covenant_i = 0; covenant_i < localStorage.length; covenant_i++) {const covenant_k = localStorage.key(covenant_i);if (covenant_k && !covenant_isNovaKey(covenant_k)) covenant_out.push(covenant_k);}return covenant_out;}
+function covenant_readProgress(covenant_relic) {try {const covenant_raw = localStorage.getItem(covenant_progressKeyFor(covenant_relic));return covenant_raw ? JSON.parse(covenant_raw) : null;} catch (covenant_e) {return null;}}
+function covenant_saveRelicProgress(covenant_relic) {
+  if (!covenant_relic) return;
+  try {
+    const covenant_data = {};
+    covenant_getRelicKeys().forEach((covenant_k) => {try {covenant_data[covenant_k] = localStorage.getItem(covenant_k);} catch (covenant_e) {}});
+    localStorage.setItem(covenant_progressKeyFor(covenant_relic), JSON.stringify({ time: Date.now(), data: covenant_data }));
+  } catch (covenant_e) {console.warn("progress save failed", covenant_e);}
+}
+function covenant_loadRelicProgress(covenant_relic) {
+  try {
+    const covenant_raw = localStorage.getItem(covenant_progressKeyFor(covenant_relic));
+    if (!covenant_raw) return;
+    const covenant_parsed = JSON.parse(covenant_raw);
+    const covenant_data = (covenant_parsed && covenant_parsed.data) || {};
+    covenant_getRelicKeys().forEach((covenant_k) => {try {localStorage.removeItem(covenant_k);} catch (covenant_e) {}});
+    Object.keys(covenant_data).forEach((covenant_k) => {try {localStorage.setItem(covenant_k, covenant_data[covenant_k]);} catch (covenant_e) {}});
+  } catch (covenant_e) {console.warn("progress load failed", covenant_e);}
+}
+function covenant_timeAgo(covenant_ts) {
+  if (!covenant_ts) return '';
+  const covenant_s = Math.floor((Date.now() - covenant_ts) / 1000);
+  if (covenant_s < 45) return 'just now';
+  const covenant_m = Math.floor(covenant_s / 60);if (covenant_m < 60) return covenant_m + 'm ago';
+  const covenant_h = Math.floor(covenant_m / 60);if (covenant_h < 24) return covenant_h + 'h ago';
+  const covenant_d = Math.floor(covenant_h / 24);if (covenant_d < 7) return covenant_d + 'd ago';
+  return new Date(covenant_ts).toLocaleDateString();
+}
+
+function covenant_applyFilters() {
+  const covenant_q = covenant_relicSeek.value.trim().toLowerCase();
+  covenant_filteredRelics = covenant_allRelics.filter((covenant_g) => {
+    if (covenant_activeSource !== "all" && covenant_g.source !== covenant_activeSource) return false;
+    if (covenant_q && !covenant_g.title.toLowerCase().includes(covenant_q)) return false;
+    return true;
+  });
+  covenant_relicsGrid.innerHTML = "";covenant_renderedCount = 0;covenant_renderMore();
+  covenant_relicCountEl.textContent = covenant_filteredRelics.length + " game" + (covenant_filteredRelics.length === 1 ? "" : "s");
+  covenant_setStatus(covenant_filteredRelics.length ? "" : "No games match your search.");
+}
+function covenant_renderMore() {
+  const covenant_next = covenant_filteredRelics.slice(covenant_renderedCount, covenant_renderedCount + covenant_PAGE_SIZE);
+  const covenant_frag = document.createDocumentFragment();
+  covenant_next.forEach((covenant_relic) => {
+    const covenant_card = document.createElement('button');
+    covenant_card.type = "button";covenant_card.className = "relic-card";
+    const covenant_img = document.createElement('img');
+    covenant_img.className = "relic-thumb";covenant_img.loading = "lazy";covenant_img.alt = covenant_relic.title;
+    covenant_img.src = covenant_relic.image || "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10'%3E%3C/svg%3E";
+    covenant_img.addEventListener('error', () => {covenant_img.style.visibility = "hidden";});
+    const covenant_meta = document.createElement('div');covenant_meta.className = "relic-meta";
+    const covenant_h3 = document.createElement('h3');covenant_h3.textContent = covenant_relic.title;
+    const covenant_span = document.createElement('span');covenant_span.textContent = covenant_relic.sourceName;
+    covenant_meta.appendChild(covenant_h3);covenant_meta.appendChild(covenant_span);
+    const covenant_prog = covenant_readProgress(covenant_relic);
+    if (covenant_prog && covenant_prog.time) {
+      const covenant_pill = document.createElement('span');covenant_pill.className = "relic-progress";
+      covenant_pill.innerHTML = '<span class="dot"></span> Saved ' + covenant_timeAgo(covenant_prog.time);
+      covenant_meta.appendChild(covenant_pill);
+    }
+    covenant_card.appendChild(covenant_img);covenant_card.appendChild(covenant_meta);
+    covenant_card.addEventListener('click', () => covenant_openRelic(covenant_relic));
+    covenant_frag.appendChild(covenant_card);
+  });
+  covenant_relicsGrid.appendChild(covenant_frag);
+  covenant_renderedCount += covenant_next.length;
+}
+covenant_relicsView.addEventListener('scroll', () => {if (covenant_renderedCount >= covenant_filteredRelics.length) return;if (covenant_relicsView.scrollTop + covenant_relicsView.clientHeight >= covenant_relicsView.scrollHeight - 400) covenant_renderMore();});
+covenant_relicSeek.addEventListener('input', covenant_applyFilters);
+
+if (false) {
+  const covenant_MUSIC_FAVORITES_KEY = 'nova.music.favorites.v1';
+  const covenant_MUSIC_API = 'https://itunes.apple.com';
+  const covenant_MUSIC_SEEDS = [
+  { title: 'HIT ME HARD AND SOFT', artist: 'Billie Eilish', query: 'Billie Eilish HIT ME HARD AND SOFT', genre: 'Pop' },
+  { title: 'GNX', artist: 'Kendrick Lamar', query: 'Kendrick Lamar GNX', genre: 'Hip-Hop' },
+  { title: 'Short n\' Sweet', artist: 'Sabrina Carpenter', query: 'Sabrina Carpenter Short n Sweet', genre: 'Pop' },
+  { title: 'CHROMAKOPIA', artist: 'Tyler, The Creator', query: 'Tyler The Creator CHROMAKOPIA', genre: 'Hip-Hop' },
+  { title: 'SOS', artist: 'SZA', query: 'SZA SOS', genre: 'R&B' },
+  { title: 'After Hours', artist: 'The Weeknd', query: 'The Weeknd After Hours', genre: 'Pop' },
+  { title: 'Blonde', artist: 'Frank Ocean', query: 'Frank Ocean Blonde', genre: 'Alternative' },
+  { title: 'Midnights', artist: 'Taylor Swift', query: 'Taylor Swift Midnights', genre: 'Pop' },
+  { title: 'IGOR', artist: 'Tyler, The Creator', query: 'Tyler The Creator IGOR', genre: 'Hip-Hop' },
+  { title: 'eternal sunshine', artist: 'Ariana Grande', query: 'Ariana Grande eternal sunshine', genre: 'Pop' },
+  { title: 'Debí Tirar Más Fotos', artist: 'Bad Bunny', query: 'Bad Bunny Debi Tirar Mas Fotos', genre: 'Latin' },
+  { title: 'Take Care', artist: 'Drake', query: 'Drake Take Care', genre: 'Hip-Hop' },
+  { title: 'Melt My Eyez See Your Future', artist: 'Denzel Curry', query: 'Denzel Curry Melt My Eyez See Your Future', genre: 'Hip-Hop' },
+  { title: 'SOS Deluxe: LANA', artist: 'SZA', query: 'SZA LANA', genre: 'R&B' },
+  { title: 'The Rise and Fall of a Midwest Princess', artist: 'Chappell Roan', query: 'Chappell Roan Midwest Princess', genre: 'Pop' },
+  { title: 'AM', artist: 'Arctic Monkeys', query: 'Arctic Monkeys AM', genre: 'Alternative' },
+  { title: 'Rumours', artist: 'Fleetwood Mac', query: 'Fleetwood Mac Rumours', genre: 'Rock' },
+  { title: 'Good Kid, M.A.A.D City', artist: 'Kendrick Lamar', query: 'Kendrick Lamar Good Kid MAAD City', genre: 'Hip-Hop' }];
+
+  let covenant_musicAlbums = [],covenant_activeMusicFilter = 'discover',covenant_musicRequestId = 0,covenant_currentMusicAlbum = null,covenant_currentMusicTracks = [],covenant_currentMusicTrackIndex = -1;
+  let covenant_musicFavorites = {};
+  try {covenant_musicFavorites = JSON.parse(localStorage.getItem(covenant_MUSIC_FAVORITES_KEY) || '{}') || {};} catch (covenant_e) {covenant_musicFavorites = {};}
+  const covenant_musicGrid = document.getElementById('musicGrid');
+  const covenant_musicSeek = document.getElementById('musicSearch');
+  const covenant_musicCount = document.getElementById('musicCount');
+  const covenant_musicResultsLabel = document.getElementById('musicResultsLabel');
+  const covenant_musicSectionTitle = document.getElementById('musicSectionTitle');
+  const covenant_musicApiStatus = document.getElementById('musicApiStatus');
+  const covenant_musicFeatureArt = document.getElementById('musicFeatureArt');
+  const covenant_musicFeatureTitle = document.getElementById('musicFeatureTitle');
+  const covenant_musicFeatureText = document.getElementById('musicFeatureText');
+  const covenant_musicFeatureBtn = document.getElementById('musicFeatureBtn');
+  const covenant_musicDrawer = document.getElementById('musicDrawer');
+  const covenant_musicDrawerTitle = document.getElementById('musicDrawerTitle');
+  const covenant_musicAlbumSummary = document.getElementById('musicAlbumSummary');
+  const covenant_musicTracks = document.getElementById('musicTracks');
+  const covenant_musicDrawerClose = document.getElementById('musicDrawerClose');
+  const covenant_musicNowPlaying = document.getElementById('musicNowPlaying');
+  const covenant_musicNowTitle = document.getElementById('musicNowTitle');
+  const covenant_musicNowArtist = document.getElementById('musicNowArtist');
+  const covenant_musicAudio = document.getElementById('musicAudio');
+
+  function covenant_musicYear(covenant_album) {return covenant_album && covenant_album.releaseDate ? new Date(covenant_album.releaseDate).getFullYear() : (covenant_album && covenant_album.year ? covenant_album.year : '');}
+  function covenant_musicDuration(covenant_ms) {if (!covenant_ms) return '';const covenant_seconds = Math.round(covenant_ms / 1000);return Math.floor(covenant_seconds / 60) + ':' + String(covenant_seconds % 60).padStart(2, '0');}
+  function covenant_musicEscapeSvg(covenant_text) {return String(covenant_text || '').replace(/[<>&"']/g, function (covenant_c) {return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[covenant_c];});}
+  function covenant_musicFallback(covenant_album, covenant_compact) {
+    const covenant_initials = String(covenant_album.artist || covenant_album.title || 'N').split(/[\s,]+/).filter(Boolean).slice(0, 2).map((covenant_x) => covenant_x[0]).join('').toUpperCase();
+    const covenant_label = covenant_compact ? '' : '<span class="album-fallback-name">' + covenant_musicEscapeSvg(covenant_album.title) + '</span>';
+    return '<div class="album-fallback" style="--cover-a:' + (covenant_album.coverA || '#8b7bff') + ';--cover-b:' + (covenant_album.coverB || '#151827') + '"><span class="album-fallback-mark">' + covenant_musicEscapeSvg(covenant_initials) + '</span>' + covenant_label + '</div>';
+  }
+  function covenant_musicArtMarkup(covenant_album, covenant_compact) {
+    if (covenant_album && covenant_album.artwork) {
+      return '<img class="album-art" src="' + covenant_album.artwork + '" alt="' + covenant_musicEscapeSvg((covenant_album.title || '') + ' by ' + (covenant_album.artist || '')) + '" loading="lazy">';
+    }
+    return covenant_musicFallback(covenant_album || {}, covenant_compact);
+  }
+  function covenant_repairMusicArt(covenant_root, covenant_album, covenant_compact) {
+    const covenant_img = covenant_root && covenant_root.querySelector ? covenant_root.querySelector('img.album-art') : null;
+    if (covenant_img) covenant_img.addEventListener('error', function () {const covenant_fallback = document.createElement('div');covenant_fallback.innerHTML = covenant_musicFallback(covenant_album, covenant_compact);covenant_img.replaceWith(covenant_fallback.firstElementChild);});
+  }
+  function covenant_isMusicFavorite(covenant_album) {return !!(covenant_album && (covenant_musicFavorites[covenant_album.collectionId] || covenant_musicFavorites[covenant_album.key]));}
+  function covenant_saveMusicFavorites() {try {localStorage.setItem(covenant_MUSIC_FAVORITES_KEY, JSON.stringify(covenant_musicFavorites));} catch (covenant_e) {}}
+  function covenant_musicFilterMatch(covenant_album) {
+    if (covenant_activeMusicFilter === 'favorites') return covenant_isMusicFavorite(covenant_album);
+    if (covenant_activeMusicFilter === 'discover') return true;
+    const covenant_genre = String(covenant_album.genre || covenant_album.primaryGenreName || '').toLowerCase();
+    if (covenant_activeMusicFilter === 'r-and-b') return covenant_genre.includes('r&b') || covenant_genre.includes('soul');
+    return covenant_genre.includes(covenant_activeMusicFilter);
+  }
+  function covenant_musicMatchesSeek(covenant_album, covenant_query) {
+    if (!covenant_query) return true;
+    const covenant_haystack = [covenant_album.title, covenant_album.artist, covenant_album.genre, covenant_album.primaryGenreName, covenant_album.trackName].join(' ').toLowerCase();
+    return covenant_haystack.includes(covenant_query.toLowerCase());
+  }
+  function covenant_renderMusicFeature(covenant_album) {
+    if (!covenant_album) return;
+    covenant_musicFeatureTitle.textContent = covenant_album.title;
+    covenant_musicFeatureText.textContent = covenant_album.artist + ' · ' + (covenant_musicYear(covenant_album) || 'Album') + ' · ' + (covenant_album.genre || covenant_album.primaryGenreName || 'Music') + '. Open the album to browse tracks and play available previews.';
+    covenant_musicFeatureArt.innerHTML = '<div class="album-art-wrap">' + covenant_musicArtMarkup(covenant_album, false) + '</div>';
+    covenant_repairMusicArt(covenant_musicFeatureArt, covenant_album, false);
+    covenant_musicFeatureBtn.textContent = 'Open ' + covenant_album.title;
+    covenant_musicFeatureBtn.onclick = function () {covenant_openMusicAlbum(covenant_album);};
+  }
+  function covenant_renderMusicCards() {
+    const covenant_query = covenant_musicSeek.value.trim();
+    const covenant_filtered = covenant_musicAlbums.filter((covenant_a) => covenant_musicFilterMatch(covenant_a) && covenant_musicMatchesSeek(covenant_a, covenant_query));
+    covenant_musicGrid.innerHTML = '';
+    covenant_musicCount.textContent = covenant_filtered.length + ' album' + (covenant_filtered.length === 1 ? '' : 's');
+    covenant_musicResultsLabel.textContent = covenant_query ? 'Catalog search' : (covenant_activeMusicFilter === 'favorites' ? 'Saved by you' : 'Real albums');
+    covenant_musicSectionTitle.textContent = covenant_query ? 'Search results' : (covenant_activeMusicFilter === 'favorites' ? 'Your favorites' : covenant_activeMusicFilter === 'discover' ? 'Nova picks' : covenant_activeMusicFilter.charAt(0).toUpperCase() + covenant_activeMusicFilter.slice(1).replace('r-and-b', 'R&B'));
+    if (!covenant_filtered.length) {
+      const covenant_empty = document.createElement('div');covenant_empty.className = 'music-empty';covenant_empty.textContent = covenant_activeMusicFilter === 'favorites' ? 'No favorites yet. Open an album and tap the heart to save it.' : 'No albums match that search.';
+      covenant_musicGrid.appendChild(covenant_empty);return;
+    }
+    const covenant_frag = document.createDocumentFragment();
+    covenant_filtered.forEach((covenant_album) => {
+      const covenant_card = document.createElement('article');covenant_card.className = 'album-card';covenant_card.tabIndex = 0;covenant_card.setAttribute('role', 'button');
+      const covenant_art = document.createElement('div');covenant_art.className = 'album-art-wrap';covenant_art.innerHTML = covenant_musicArtMarkup(covenant_album, false);
+      covenant_repairMusicArt(covenant_art, covenant_album, false);
+      const covenant_play = document.createElement('span');covenant_play.className = 'album-play';covenant_play.setAttribute('aria-hidden', 'true');covenant_play.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></svg>';covenant_art.appendChild(covenant_play);
+      const covenant_heart = document.createElement('button');covenant_heart.type = 'button';covenant_heart.className = 'album-heart' + (covenant_isMusicFavorite(covenant_album) ? ' saved' : '');covenant_heart.title = covenant_isMusicFavorite(covenant_album) ? 'Remove favorite' : 'Save favorite';covenant_heart.innerHTML = '<svg viewBox="0 0 24 24" fill="' + (covenant_isMusicFavorite(covenant_album) ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.4-8.8 10.2-8.8 10.2S3.2 14.2 3.2 8.8A4.6 4.6 0 0 1 12 6.2a4.6 4.6 0 0 1 8.8 2.6z"/></svg>';
+      covenant_heart.addEventListener('click', function (covenant_e) {covenant_e.stopPropagation();const covenant_id = covenant_album.collectionId || covenant_album.key;if (covenant_isMusicFavorite(covenant_album)) delete covenant_musicFavorites[covenant_id];else covenant_musicFavorites[covenant_id] = true;covenant_saveMusicFavorites();covenant_renderMusicCards();});
+      covenant_art.appendChild(covenant_heart);
+      const covenant_meta = document.createElement('div');covenant_meta.className = 'album-meta';covenant_meta.innerHTML = '<h3>' + covenant_musicEscapeSvg(covenant_album.title) + '</h3><p>' + covenant_musicEscapeSvg(covenant_album.artist) + '</p><small>' + covenant_musicEscapeSvg(String(covenant_musicYear(covenant_album) || '') + (covenant_album.genre ? ' · ' + covenant_album.genre : '')) + '</small>';
+      covenant_card.appendChild(covenant_art);covenant_card.appendChild(covenant_meta);
+      covenant_card.addEventListener('click', function () {covenant_openMusicAlbum(covenant_album);});
+      covenant_card.addEventListener('keydown', function (covenant_e) {if (covenant_e.key === 'Enter' || covenant_e.key === ' ') {covenant_e.preventDefault();covenant_openMusicAlbum(covenant_album);}});
+      covenant_frag.appendChild(covenant_card);
+    });
+    covenant_musicGrid.appendChild(covenant_frag);
+  }
+  async function covenant_lookupMusicAlbum(covenant_album) {
+    if (covenant_album.collectionId && covenant_album.tracks) return covenant_album;
+    try {
+      const covenant_res = await fetch(covenant_MUSIC_API + '/search?term=' + encodeURIComponent(covenant_album.query || (covenant_album.artist + ' ' + covenant_album.title)) + '&entity=album&limit=8');
+      if (!covenant_res.ok) throw new Error('catalog ' + covenant_res.status);
+      const covenant_data = await covenant_res.json();
+      const covenant_exact = (covenant_data.results || []).find((covenant_r) => String(covenant_r.collectionName || '').toLowerCase() === String(covenant_album.title || '').toLowerCase() && String(covenant_r.artistName || '').toLowerCase().includes(String(covenant_album.artist || '').toLowerCase().split(',')[0])) || covenant_data.results && covenant_data.results[0];
+      if (!covenant_exact) return covenant_album;
+      covenant_album.collectionId = covenant_exact.collectionId;covenant_album.artwork = (covenant_exact.artworkUrl600 || covenant_exact.artworkUrl100 || '').replace('100x100bb', '600x600bb');covenant_album.collectionViewUrl = covenant_exact.collectionViewUrl;covenant_album.releaseDate = covenant_exact.releaseDate;covenant_album.primaryGenreName = covenant_exact.primaryGenreName;covenant_album.trackCount = covenant_exact.trackCount;covenant_album.artist = covenant_exact.artistName || covenant_album.artist;covenant_album.title = covenant_exact.collectionName || covenant_album.title;
+      covenant_album.genre = covenant_album.genre || covenant_album.primaryGenreName;
+      return covenant_album;
+    } catch (covenant_e) {return covenant_album;}
+  }
+  async function covenant_seekMusicCatalog(covenant_query) {
+    const covenant_requestId = ++covenant_musicRequestId;
+    if (!covenant_query) {covenant_renderMusicCards();return;}
+    covenant_musicApiStatus.textContent = 'Searching the music catalog…';
+    try {
+      const covenant_res = await fetch(covenant_MUSIC_API + '/search?term=' + encodeURIComponent(covenant_query) + '&entity=album&limit=40');
+      if (!covenant_res.ok) throw new Error('catalog ' + covenant_res.status);
+      const covenant_data = await covenant_res.json();
+      if (covenant_requestId !== covenant_musicRequestId) return;
+      const covenant_results = (covenant_data.results || []).map((covenant_r, covenant_i) => ({ key: 'search-' + covenant_r.collectionId + '-' + covenant_i, collectionId: covenant_r.collectionId, title: covenant_r.collectionName, artist: covenant_r.artistName, artwork: (covenant_r.artworkUrl600 || covenant_r.artworkUrl100 || '').replace('100x100bb', '600x600bb'), collectionViewUrl: covenant_r.collectionViewUrl, releaseDate: covenant_r.releaseDate, genre: covenant_r.primaryGenreName, primaryGenreName: covenant_r.primaryGenreName, trackCount: covenant_r.trackCount }));
+      covenant_musicAlbums = covenant_results;
+      covenant_activeMusicFilter = 'discover';
+      document.querySelectorAll('.music-filter').forEach((covenant_b) => covenant_b.classList.toggle('active', covenant_b.dataset.musicFilter === 'discover'));
+      covenant_musicApiStatus.textContent = 'Live catalog search';
+      covenant_renderMusicCards();
+    } catch (covenant_e) {covenant_musicApiStatus.textContent = 'Catalog search unavailable — showing Nova picks';covenant_renderMusicCards();}
+  }
+  async function covenant_loadMusicLibrary() {
+    covenant_musicGrid.innerHTML = '';
+    const covenant_loaded = await Promise.all(covenant_MUSIC_SEEDS.map((covenant_seed, covenant_index) => {covenant_seed.key = 'seed-' + covenant_index;covenant_seed.coverA = ['#8b7bff', '#ff6f91', '#4fe0c4', '#ffb86b'][covenant_index % 4];covenant_seed.coverB = ['#241c4d', '#351426', '#123633', '#36210f'][covenant_index % 4];return covenant_lookupMusicAlbum(covenant_seed);}));
+    covenant_musicAlbums = covenant_loaded;
+    covenant_musicApiStatus.textContent = 'Connected to the music catalog';
+    covenant_renderMusicFeature(covenant_musicAlbums[0]);
+    covenant_renderMusicCards();
+  }
+  function covenant_renderMusicSummary(covenant_album) {
+    covenant_musicDrawerTitle.textContent = covenant_album.title;
+    covenant_musicAlbumSummary.innerHTML = '<div class="album-art-wrap">' + covenant_musicArtMarkup(covenant_album, true) + '</div><div><h3>' + covenant_musicEscapeSvg(covenant_album.title) + '</h3><p>' + covenant_musicEscapeSvg(covenant_album.artist) + '<br>' + covenant_musicEscapeSvg(String(covenant_musicYear(covenant_album) || '') + (covenant_album.genre ? ' · ' + covenant_album.genre : '')) + '</p>' + (covenant_album.collectionViewUrl ? '<a href="' + covenant_album.collectionViewUrl + '" target="_blank" rel="noopener noreferrer">View album in Apple Music ↗</a>' : '') + '</div>';
+    covenant_repairMusicArt(covenant_musicAlbumSummary, covenant_album, true);
+  }
+  async function covenant_openMusicAlbum(covenant_album) {
+    covenant_currentMusicAlbum = covenant_album;covenant_currentMusicTracks = [];covenant_currentMusicTrackIndex = -1;
+    covenant_musicDrawer.classList.add('open');covenant_musicDrawer.setAttribute('aria-hidden', 'false');covenant_renderMusicSummary(covenant_album);
+    covenant_musicTracks.innerHTML = '<div class="music-empty">Loading tracks…</div>';
+    try {
+      if (!covenant_album.collectionId) await covenant_lookupMusicAlbum(covenant_album);
+      if (!covenant_album.collectionId) throw new Error('no id');
+      const covenant_res = await fetch(covenant_MUSIC_API + '/lookup?id=' + encodeURIComponent(covenant_album.collectionId) + '&entity=song');
+      if (!covenant_res.ok) throw new Error('tracks ' + covenant_res.status);
+      const covenant_data = await covenant_res.json();
+      covenant_currentMusicTracks = (covenant_data.results || []).filter((covenant_t) => covenant_t.wrapperType === 'track' && covenant_t.kind === 'song').map((covenant_t) => ({ title: covenant_t.trackName, previewUrl: covenant_t.previewUrl, duration: covenant_t.trackTimeMillis, artist: covenant_t.artistName || covenant_album.artist }));
+      covenant_renderMusicSummary(covenant_album);covenant_renderMusicTracks();
+    } catch (covenant_e) {covenant_musicTracks.innerHTML = '<div class="music-empty">Tracks could not load right now. Try again in a moment.</div>';}
+  }
+  function covenant_renderMusicTracks() {
+    covenant_musicTracks.innerHTML = '';
+    if (!covenant_currentMusicTracks.length) {covenant_musicTracks.innerHTML = '<div class="music-empty">No track previews are listed for this album.</div>';return;}
+    const covenant_frag = document.createDocumentFragment();
+    covenant_currentMusicTracks.forEach((covenant_track, covenant_index) => {
+      const covenant_row = document.createElement('button');covenant_row.type = 'button';covenant_row.className = 'track-row' + (!covenant_track.previewUrl ? ' unavailable' : '') + (covenant_index === covenant_currentMusicTrackIndex ? ' active' : '');
+      covenant_row.innerHTML = '<span class="track-number">' + (covenant_index + 1) + '</span><span class="track-title">' + covenant_musicEscapeSvg(covenant_track.title) + '</span><span class="track-time">' + (covenant_track.previewUrl ? covenant_musicDuration(covenant_track.duration) : 'No preview') + '</span>';
+      if (covenant_track.previewUrl) covenant_row.addEventListener('click', function () {covenant_playMusicTrack(covenant_index);});
+      covenant_frag.appendChild(covenant_row);
+    });
+    covenant_musicTracks.appendChild(covenant_frag);
+  }
+  function covenant_playMusicTrack(covenant_index) {
+    const covenant_track = covenant_currentMusicTracks[covenant_index];if (!covenant_track || !covenant_track.previewUrl) return;
+    covenant_currentMusicTrackIndex = covenant_index;covenant_musicNowTitle.textContent = covenant_track.title;covenant_musicNowArtist.textContent = covenant_track.artist || (covenant_currentMusicAlbum && covenant_currentMusicAlbum.artist) || '';covenant_musicNowPlaying.classList.add('visible');covenant_musicAudio.src = covenant_track.previewUrl;covenant_musicAudio.play().catch(function () {});covenant_renderMusicTracks();
+  }
+  covenant_musicAudio.addEventListener('ended', function () {if (covenant_currentMusicTrackIndex + 1 < covenant_currentMusicTracks.length) covenant_playMusicTrack(covenant_currentMusicTrackIndex + 1);});
+  covenant_musicDrawerClose.addEventListener('click', function () {covenant_musicDrawer.classList.remove('open');covenant_musicDrawer.setAttribute('aria-hidden', 'true');covenant_musicAudio.pause();});
+  document.addEventListener('keydown', function (covenant_e) {if (covenant_e.key === 'Escape' && covenant_musicDrawer.classList.contains('open')) {covenant_musicDrawer.classList.remove('open');covenant_musicDrawer.setAttribute('aria-hidden', 'true');covenant_musicAudio.pause();}});
+  document.querySelectorAll('.music-filter').forEach((covenant_button) => covenant_button.addEventListener('click', function () {
+    covenant_activeMusicFilter = covenant_button.dataset.musicFilter;covenant_musicSeek.value = '';document.querySelectorAll('.music-filter').forEach((covenant_b) => covenant_b.classList.toggle('active', covenant_b === covenant_button));covenant_renderMusicCards();
+  }));
+  let covenant_musicSeekTimer;
+  covenant_musicSeek.addEventListener('input', function () {clearTimeout(covenant_musicSeekTimer);const covenant_q = covenant_musicSeek.value.trim();if (covenant_q) covenant_musicSeekTimer = setTimeout(function () {covenant_seekMusicCatalog(covenant_q);}, 420);else {covenant_activeMusicFilter = 'discover';document.querySelectorAll('.music-filter').forEach((covenant_b) => covenant_b.classList.toggle('active', covenant_b.dataset.musicFilter === 'discover'));covenant_loadMusicLibrary();}});
+  covenant_loadMusicLibrary();
+}
+
+(function () {
+  const covenant_musicView = document.getElementById('view-music');
+  const covenant_musicTopbar = document.getElementById('musicTopbar');
+  const covenant_musicHomeBtn = document.getElementById('musicHomeBtn');
+  const covenant_musicHomeHotzone = document.getElementById('musicHomeHotzone');
+  const covenant_musicSanctuaryFrame = document.getElementById("musicSanctuaryFrame");
+  const covenant_musicSanctuaryLoading = document.getElementById("musicSanctuaryLoading");
+  const covenant_musicSanctuaryStatus = document.getElementById("musicSanctuaryStatus");
+  const covenant_musicSanctuaryDot = document.getElementById("musicSanctuaryDot");
+  const covenant_musicSanctuaryReload = document.getElementById("musicSanctuaryReload");
+  if (!covenant_musicView || !covenant_musicSanctuaryFrame) return;
+
+  const covenant_MUSIC_SANCTUARY_ENGINE = 'https://catclassgoat.s3.us-east-1.amazonaws.com/circle.svg';
+  const covenant_MUSIC_SOUND_CLOUD = 'https://soundcloud.com/';
+  const covenant_MUSIC_PILGRIMAGES = [
+  'wss://education123321.b-cdn.net/api/',
+  'wss://science-340154168.b-cdn.net/api/',
+  'wss://c47cl455w1n.b-cdn.net/api/',
+  'wss://classroom.linuxoz.net/api/',
+  'wss://classroom.qjdy.net/api/',
+  'wss://classroom.wiki.gd/api/',
+  'wss://classroom.couchit.net/api/',
+  'wss://task4z.com/api/',
+  'wss://ns514995.ip-167-114-208.net/api/',
+  'wss://wisp.mercurywork.shop/wisp/',
+  'wss://wisp.mercurywork.shop/'];
+
+  const covenant_MUSIC_PILGRIMAGE_KEY = 'nova.relay';
+  let covenant_musicPilgrimage = null;
+  let covenant_musicSanctuaryReady = false;
+  let covenant_musicSanctuaryLoadTimer = null;
+  let covenant_musicLastScroll = 0;
+  let covenant_musicHomeHideTimer = null;
+  try {covenant_musicPilgrimage = localStorage.getItem(covenant_MUSIC_PILGRIMAGE_KEY);} catch (covenant_e) {}
+
+  function covenant_musicSanctuaryCommand(covenant_action, covenant_extra) {
+    try {covenant_musicSanctuaryFrame.contentWindow.postMessage(Object.assign({ type: 'e:command', action: covenant_action }, covenant_extra || {}), '*');} catch (covenant_e) {}
+  }
+  function covenant_setMusicSanctuaryLoading(covenant_title, covenant_detail) {
+    covenant_musicSanctuaryLoading.classList.remove('hidden');
+    const covenant_strong = covenant_musicSanctuaryLoading.querySelector('strong');
+    const covenant_span = covenant_musicSanctuaryLoading.querySelector('span');
+    if (covenant_strong) covenant_strong.textContent = covenant_title || 'This may take a while.';
+    if (covenant_span) covenant_span.textContent = covenant_detail || 'SoundCloud is loading through Nova\'s proxy. Please be patient while the connection starts.';
+  }
+  function covenant_hideMusicSanctuaryLoading() {
+    window.clearTimeout(covenant_musicSanctuaryLoadTimer);
+    covenant_musicSanctuaryLoadTimer = window.setTimeout(function () {covenant_musicSanctuaryLoading.classList.add('hidden');}, 900);
+  }
+  function covenant_saveMusicPilgrimage(covenant_url) {
+    covenant_musicPilgrimage = covenant_url;
+    try {localStorage.setItem(covenant_MUSIC_PILGRIMAGE_KEY, covenant_url);} catch (covenant_e) {}
+  }
+  function covenant_navigateMusicSanctuary() {
+    covenant_musicSanctuaryCommand('navigate', { url: covenant_MUSIC_SOUND_CLOUD });
+    covenant_musicSanctuaryStatus.textContent = 'Loading SoundCloud through Nova\'s proxy…';
+    covenant_setMusicSanctuaryLoading('This may take a while.', 'SoundCloud is loading through Nova\'s proxy. Please be patient while the connection starts.');
+  }
+  function covenant_chooseMusicPilgrimage() {
+    const covenant_list = covenant_musicPilgrimage ? [covenant_musicPilgrimage].concat(covenant_MUSIC_PILGRIMAGES.filter(function (covenant_r) {return covenant_r !== covenant_musicPilgrimage;})) : covenant_MUSIC_PILGRIMAGES.slice();
+    (function covenant_attempt(covenant_index) {
+      if (covenant_index >= covenant_list.length) {
+        covenant_saveMusicPilgrimage(covenant_list[covenant_list.length - 1]);
+        covenant_musicSanctuaryCommand('setW1p', { w1p: covenant_list[covenant_list.length - 1] });
+        covenant_navigateMusicSanctuary();
+        return;
+      }
+      const covenant_url = covenant_list[covenant_index];let covenant_settled = false;
+      function covenant_next() {if (!covenant_settled) {covenant_settled = true;covenant_attempt(covenant_index + 1);}}
+      try {
+        const covenant_ws = new WebSocket(covenant_url);
+        const covenant_timer = window.setTimeout(function () {if (!covenant_settled) {covenant_settled = true;try {covenant_ws.close();} catch (covenant_e) {}covenant_attempt(covenant_index + 1);}}, 3000);
+        covenant_ws.onopen = function () {if (covenant_settled) return;covenant_settled = true;window.clearTimeout(covenant_timer);try {covenant_ws.close();} catch (covenant_e) {}covenant_saveMusicPilgrimage(covenant_url);covenant_musicSanctuaryCommand('setW1p', { w1p: covenant_url });covenant_navigateMusicSanctuary();};
+        covenant_ws.onerror = function () {window.clearTimeout(covenant_timer);covenant_next();};
+        covenant_ws.onclose = function () {window.clearTimeout(covenant_timer);covenant_next();};
+      } catch (covenant_e) {covenant_next();}
+    })(0);
+  }
+  function covenant_startMusicSanctuary() {
+    covenant_musicSanctuaryReady = false;
+    covenant_musicSanctuaryDot.classList.remove('ready');
+    covenant_musicSanctuaryStatus.textContent = 'Connecting to SoundCloud through Nova\'s proxy…';
+    covenant_setMusicSanctuaryLoading('This may take a while.', 'SoundCloud is loading through Nova\'s proxy. Please be patient while the connection starts.');
+    covenant_musicSanctuaryFrame.src = covenant_MUSIC_SANCTUARY_ENGINE;
+  }
+  function covenant_reloadMusicSanctuary() {covenant_startMusicSanctuary();}
+
+  covenant_musicSanctuaryFrame.addEventListener('load', function () {covenant_musicSanctuaryStatus.textContent = 'Proxy is ready — SoundCloud is starting…';});
+  window.addEventListener('message', function (covenant_event) {
+    if (covenant_event.source !== covenant_musicSanctuaryFrame.contentWindow) return;
+    const covenant_data = covenant_event.data;
+    if (!covenant_data || covenant_data.source !== 'e') return;
+    const covenant_type = (covenant_data.type || '').replace('e:', '');
+    if (covenant_type === 'ready') {
+      covenant_musicSanctuaryReady = true;
+      covenant_musicSanctuaryDot.classList.add('ready');
+      covenant_musicSanctuaryStatus.textContent = 'SoundCloud is connected through Nova\'s proxy';
+      covenant_chooseMusicPilgrimage();
+    } else if (covenant_type === 'urlchange' && covenant_data.url && /soundcloud\.com/i.test(covenant_data.url)) {
+      covenant_musicSanctuaryStatus.textContent = 'SoundCloud is ready';
+      covenant_hideMusicSanctuaryLoading();
+    } else if (covenant_type === 'titlechange' && covenant_data.title && /soundcloud/i.test(covenant_data.title)) {
+      covenant_musicSanctuaryStatus.textContent = 'SoundCloud is ready';
+      covenant_hideMusicSanctuaryLoading();
+    } else if (covenant_type === 'error') {
+      covenant_musicSanctuaryStatus.textContent = 'SoundCloud is taking longer than usual — try Reload SoundCloud';
+      covenant_setMusicSanctuaryLoading('This may take a while.', 'The proxy is still trying to connect to SoundCloud. You can wait or reload the connection.');
+    }
+  });
+  covenant_musicSanctuaryReload.addEventListener('click', covenant_reloadMusicSanctuary);
+  covenant_musicHomeBtn.addEventListener('click', function () {covenant_goToView('home');});
+  function covenant_revealMusicHome() {
+    covenant_musicTopbar.classList.remove('hidden');
+    window.clearTimeout(covenant_musicHomeHideTimer);
+    covenant_musicHomeHideTimer = window.setTimeout(function () {covenant_musicTopbar.classList.add('hidden');}, 2400);
+  }
+  function covenant_keepMusicHomeVisible() {window.clearTimeout(covenant_musicHomeHideTimer);covenant_musicTopbar.classList.remove('hidden');}
+  if (covenant_musicHomeHotzone) {
+    covenant_musicHomeHotzone.addEventListener('mouseenter', covenant_revealMusicHome);
+    covenant_musicHomeHotzone.addEventListener('mousemove', covenant_revealMusicHome);
+  }
+  covenant_musicHomeBtn.addEventListener('mouseenter', covenant_keepMusicHomeVisible);
+  covenant_musicHomeBtn.addEventListener('mouseleave', covenant_revealMusicHome);
+  covenant_musicView.addEventListener('mousemove', function (covenant_event) {if (covenant_event.clientY <= 92) covenant_revealMusicHome();});
+  window.addEventListener('mousemove', function (covenant_event) {if (covenant_event.clientY <= 12) covenant_revealMusicHome();});
+  covenant_musicView.addEventListener('scroll', function () {
+    const covenant_current = covenant_musicView.scrollTop;
+    if (covenant_current <= 8) {covenant_musicTopbar.classList.remove('hidden');covenant_musicLastScroll = covenant_current;return;}
+    if (covenant_current > covenant_musicLastScroll + 4) covenant_musicTopbar.classList.add('hidden');else
+    if (covenant_current < covenant_musicLastScroll - 4) covenant_musicTopbar.classList.remove('hidden');
+    covenant_musicLastScroll = covenant_current;
+  }, { passive: true });
+  covenant_startMusicSanctuary();
+  covenant_musicHomeHideTimer = window.setTimeout(function () {covenant_musicTopbar.classList.add('hidden');}, 2600);
+})();
+
+const covenant_sourceCounts = {};
+async function covenant_loadLibrary(covenant_force) {
+  if (!covenant_force) {const covenant_cached = covenant_readCache();if (covenant_cached) {covenant_allRelics = covenant_cleanLibrary(covenant_cached);covenant_countSources();covenant_applyFilters();return;}}
+  covenant_setStatus("Loading games from " + covenant_SOURCES.map((covenant_s) => covenant_s.name).join(", ") + "...");
+  const covenant_results = await Promise.allSettled(covenant_SOURCES.map((covenant_s) => covenant_s.loader()));
+  const covenant_relics = [];const covenant_failed = [];
+  covenant_results.forEach((covenant_r, covenant_i) => {
+    if (covenant_r.status === "fulfilled") {covenant_relics.push.apply(covenant_relics, covenant_r.value);} else
+    {covenant_failed.push(covenant_SOURCES[covenant_i].name);console.error(covenant_SOURCES[covenant_i].name + " failed", covenant_r.reason);}
+  });
+  covenant_allRelics = covenant_cleanLibrary(covenant_relics);
+  covenant_countSources();
+  if (covenant_allRelics.length) covenant_writeCache(covenant_relics);
+  covenant_applyFilters();
+  if (covenant_failed.length && covenant_allRelics.length) {covenant_relicCountEl.textContent += " \u2022 " + covenant_failed.join(" & ") + " unavailable";} else
+  if (covenant_failed.length) {covenant_setStatus("Couldn't load games right now. Check your connection and refresh.");}
+}
+function covenant_countSources() {covenant_SOURCES.forEach((covenant_s) => {covenant_sourceCounts[covenant_s.id] = covenant_allRelics.filter((covenant_g) => covenant_g.source === covenant_s.id).length;});}
+
+const covenant_relicPlayer = document.getElementById("relicPlayer");
+const covenant_playerTitle = document.getElementById('playerTitle');
+const covenant_playerFrameWrap = document.getElementById('playerFrameWrap');
+const covenant_playerLoading = document.getElementById('playerLoading');
+const covenant_playerSaved = document.getElementById('playerSaved');
+let covenant_playerFrame = null,covenant_currentRelicHtml = "",covenant_currentRelic = null,covenant_progressSaveInterval = null;
+
+function covenant_openRelic(covenant_relic) {
+  covenant_currentRelic = covenant_relic;
+  if (covenant_relic.external) {
+    const covenant_win = window.open(covenant_relic.url, "_blank", "noopener");
+    if (!covenant_win) alert('Your browser blocked the new tab. Allow pop-ups for this site and try again.');
+    return;
+  }
+  covenant_loadRelicProgress(covenant_relic);
+  covenant_playerTitle.textContent = covenant_relic.author ? covenant_relic.title + " \u2014 by " + covenant_relic.author : covenant_relic.title;
+  covenant_relicPlayer.classList.add('open');
+  covenant_playerLoading.style.display = "flex";
+  covenant_playerLoading.textContent = "Loading " + covenant_relic.title + "...";
+  covenant_playerSaved.style.display = "inline-flex";
+  if (covenant_playerFrame) {covenant_playerFrame.remove();covenant_playerFrame = null;}
+  covenant_currentRelicHtml = "";
+  if (covenant_progressSaveInterval) clearInterval(covenant_progressSaveInterval);
+  covenant_progressSaveInterval = setInterval(function () {if (covenant_currentRelic) covenant_saveRelicProgress(covenant_currentRelic);}, 4000);
+  fetch(covenant_relic.url + (covenant_relic.url.includes("?") ? "&" : "?") + "t=" + Date.now()).
+  then((covenant_res) => {if (!covenant_res.ok) throw new Error("HTTP " + covenant_res.status);return covenant_res.text();}).
+  then((covenant_html) => {
+    covenant_currentRelicHtml = covenant_html;
+    covenant_playerFrame = document.createElement('iframe');
+    covenant_playerFrame.allow = "autoplay; fullscreen; gamepad; clipboard-write; pointer-lock";
+    covenant_playerFrame.setAttribute('allowfullscreen', '');
+    covenant_playerFrameWrap.appendChild(covenant_playerFrame);
+    const covenant_doc = covenant_playerFrame.contentDocument;
+    covenant_doc.open();covenant_doc.write(covenant_html);covenant_doc.close();
+    covenant_playerLoading.style.display = "none";
+    covenant_playerFrame.focus();
+  }).
+  catch((covenant_err) => {covenant_playerLoading.style.display = "flex";covenant_playerLoading.textContent = "This game isn't working right now (" + covenant_err.message + ").";});
+}
+function covenant_closeRelic() {
+  if (covenant_currentRelic) covenant_saveRelicProgress(covenant_currentRelic);
+  if (covenant_progressSaveInterval) {clearInterval(covenant_progressSaveInterval);covenant_progressSaveInterval = null;}
+  covenant_relicPlayer.classList.remove('open');
+  covenant_playerSaved.style.display = "none";
+  if (covenant_playerFrame) {covenant_playerFrame.remove();covenant_playerFrame = null;}
+  covenant_currentRelicHtml = "";covenant_currentRelic = null;
+  if (covenant_allRelics.length) {covenant_relicsGrid.innerHTML = "";covenant_renderedCount = 0;covenant_renderMore();}
+}
+document.getElementById('playerClose').addEventListener('click', covenant_closeRelic);
+document.getElementById('playerFullscreen').addEventListener('click', () => {const covenant_target = covenant_playerFrame || covenant_playerFrameWrap;if (covenant_target.requestFullscreen) covenant_target.requestFullscreen();else if (covenant_target.webkitRequestFullscreen) covenant_target.webkitRequestFullscreen();});
+document.getElementById('playerBlank').addEventListener('click', () => {
+  if (!covenant_currentRelicHtml) {alert('Wait for the game to load first.');return;}
+  if (covenant_currentRelic) covenant_saveRelicProgress(covenant_currentRelic);
+  const covenant_win = covenant_openCloakedWindow(covenant_currentRelicHtml, covenant_currentRelic ? covenant_currentRelic.title : 'New Tab');
+  if (!covenant_win) alert('Your browser blocked the new tab. Allow pop-ups for this site and try again.');
+});
+document.addEventListener('keydown', (covenant_e) => {
+  if (covenant_e.key === "Escape") {if (covenant_relicPlayer.classList.contains('open')) covenant_closeRelic();}
+});
+
+document.getElementById('refreshLibraryBtn').addEventListener('click', () => {try {localStorage.removeItem(covenant_CACHE_KEY);} catch (covenant_e) {}covenant_goToView("relics");covenant_loadLibrary(true);});
+document.getElementById('resetSettingsBtn').addEventListener('click', () => {try {localStorage.removeItem(covenant_SETTINGS_KEY);} catch (covenant_e) {}location.reload();});
+document.getElementById('clearProgressBtn').addEventListener('click', () => {
+  if (!confirm('Clear all saved game progress? This cannot be undone.')) return;
+  const covenant_toRemove = [];
+  for (let covenant_i = 0; covenant_i < localStorage.length; covenant_i++) {const covenant_k = localStorage.key(covenant_i);if (covenant_k && covenant_k.startsWith(covenant_PROGRESS_PREFIX)) covenant_toRemove.push(covenant_k);}
+  covenant_toRemove.forEach((covenant_k) => {try {localStorage.removeItem(covenant_k);} catch (covenant_e) {}});
+  covenant_getRelicKeys().forEach((covenant_k) => {try {localStorage.removeItem(covenant_k);} catch (covenant_e) {}});
+  if (covenant_allRelics.length) {covenant_relicsGrid.innerHTML = "";covenant_renderedCount = 0;covenant_renderMore();}
+});
+
+covenant_loadLibrary(false);
+
+const covenant_canvas = document.getElementById('starfield');
+const covenant_ctx = covenant_canvas.getContext('2d');
+let covenant_starParticles = [];
+const covenant_reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function covenant_resizeCanvas() {const covenant_homeView = document.getElementById('view-home');covenant_canvas.width = covenant_homeView.clientWidth;covenant_canvas.height = covenant_homeView.clientHeight;}
+function covenant_initStars() {covenant_starParticles = [];const covenant_count = Math.floor((covenant_canvas.width * covenant_canvas.height) / 9000);for (let covenant_i = 0; covenant_i < covenant_count; covenant_i++) {covenant_starParticles.push({ x: Math.random() * covenant_canvas.width, y: Math.random() * covenant_canvas.height, r: Math.random() * 1.4 + 0.3, phase: Math.random() * Math.PI * 2, speed: 0.008 + Math.random() * 0.02 });}}
+function covenant_drawStars(covenant_t) {covenant_ctx.clearRect(0, 0, covenant_canvas.width, covenant_canvas.height);covenant_starParticles.forEach((covenant_p) => {const covenant_twinkle = 0.5 + 0.5 * Math.sin(covenant_t * covenant_p.speed + covenant_p.phase);covenant_ctx.beginPath();covenant_ctx.arc(covenant_p.x, covenant_p.y, covenant_p.r, 0, Math.PI * 2);covenant_ctx.fillStyle = 'rgba(255,255,255,' + (0.25 + covenant_twinkle * 0.6) + ')';covenant_ctx.fill();});if (!covenant_reducedMotion) {requestAnimationFrame(covenant_drawStars);}}
+covenant_resizeCanvas();covenant_initStars();requestAnimationFrame(covenant_drawStars);
+if (covenant_reducedMotion) {covenant_drawStars(0);}
+window.addEventListener('resize', () => {covenant_resizeCanvas();covenant_initStars();});
+(function () {
+  var covenant_ENGINE = 'https://catclassgoat.s3.us-east-1.amazonaws.com/circle.svg';
+  var covenant_PILGRIMAGES = [
+  'wss://education123321.b-cdn.net/api/',
+  'wss://science-340154168.b-cdn.net/api/',
+  'wss://c47cl455w1n.b-cdn.net/api/',
+  'wss://classroom.linuxoz.net/api/',
+  'wss://classroom.qjdy.net/api/',
+  'wss://classroom.wiki.gd/api/',
+  'wss://classroom.couchit.net/api/',
+  'wss://task4z.com/api/',
+  'wss://ns514995.ip-167-114-208.net/api/',
+  'wss://wisp.mercurywork.shop/wisp/',
+  'wss://wisp.mercurywork.shop/'];
+
+  var covenant_PILGRIMAGE_KEY = 'nova.relay';
+  var covenant_SEEK = 'https://duckduckgo.com/?q=%s';
+
+  var covenant_shell = document.getElementById("chapelShell");
+  var covenant_startEl = document.getElementById("chapelStart");
+  var covenant_tabsEl = document.getElementById("chapelTabs");
+  var covenant_viewport = document.getElementById("chapelViewport");
+  var covenant_urlBar = document.getElementById("chapelUrl");
+  var covenant_statusEl = document.getElementById("chapelStatus");
+  if (!covenant_shell) return;
+  var covenant_shortcutBar = document.querySelector(".chapel-shortcuts");
+  if (covenant_shortcutBar) covenant_shortcutBar.remove();
+
+  var covenant_tabs = [];
+  var covenant_nextId = 0;
+  var covenant_activeId = null;
+  var covenant_pilgrimage = null;
+  try {covenant_pilgrimage = localStorage.getItem(covenant_PILGRIMAGE_KEY);} catch (covenant_e) {}
+
+  function covenant_setStatus(covenant_msg) {covenant_statusEl.textContent = covenant_msg || '';covenant_statusEl.classList.toggle('show', !!covenant_msg);}
+  function covenant_updateStart() {if (covenant_startEl) covenant_startEl.classList.toggle('show', covenant_tabs.length === 0);}
+
+  function covenant_toUrl(covenant_value) {
+    var covenant_v = (covenant_value || '').trim();
+    if (!covenant_v) return null;
+    try {var covenant_u = new URL(covenant_v);if (covenant_u.protocol === 'http:' || covenant_u.protocol === 'https:') return covenant_u.toString();} catch (covenant_e) {}
+    try {var covenant_u2 = new URL('https://' + covenant_v);if (covenant_u2.hostname.indexOf('.') > 0 && !/\s/.test(covenant_v)) return covenant_u2.toString();} catch (covenant_e) {}
+    return covenant_SEEK.replace('%s', encodeURIComponent(covenant_v));
+  }
+
+  function covenant_byId(covenant_id) {for (var covenant_i = 0; covenant_i < covenant_tabs.length; covenant_i++) {if (covenant_tabs[covenant_i].id === covenant_id) return covenant_tabs[covenant_i];}return null;}
+
+  function covenant_cmd(covenant_id, covenant_action, covenant_extra) {
+    var covenant_t = covenant_byId(covenant_id);if (!covenant_t) return;
+    var covenant_msg = Object.assign({ type: 'e:command', action: covenant_action }, covenant_extra || {});
+    try {covenant_t.frame.contentWindow.postMessage(covenant_msg, '*');} catch (covenant_e) {}
+  }
+
+  function covenant_label(covenant_t) {
+    if (covenant_t.title) return covenant_t.title;
+    if (covenant_t.url) {try {return new URL(covenant_t.url).hostname.replace(/^www\./, '');} catch (covenant_e) {return covenant_t.url;}}
+    return 'New Tab';
+  }
+
+  function covenant_renderTabs() {
+    covenant_tabsEl.innerHTML = '';
+    covenant_tabs.forEach(function (covenant_t) {
+      var covenant_el = document.createElement('div');
+      covenant_el.className = "chapel-tab" + (covenant_t.id === covenant_activeId ? ' active' : '');
+      var covenant_title = document.createElement('span');
+      covenant_title.className = "chapel-tab-title";
+      covenant_title.textContent = covenant_label(covenant_t);
+      covenant_el.appendChild(covenant_title);
+      var covenant_x = document.createElement('button');
+      covenant_x.className = "chapel-tab-x";
+      covenant_x.type = 'button';
+      covenant_x.textContent = '\u00D7';
+      covenant_x.addEventListener('click', function (covenant_ev) {covenant_ev.stopPropagation();covenant_closeTab(covenant_t.id);});
+      covenant_el.appendChild(covenant_x);
+      covenant_el.addEventListener('click', function () {covenant_activate(covenant_t.id);});
+      covenant_tabsEl.appendChild(covenant_el);
+    });
+  }
+
+  function covenant_activate(covenant_id) {
+    covenant_activeId = covenant_id;
+    covenant_tabs.forEach(function (covenant_t) {covenant_t.frame.classList.toggle("chapel-active", covenant_t.id === covenant_id);});
+    var covenant_t = covenant_byId(covenant_id);
+    covenant_urlBar.value = covenant_t ? (covenant_t.url || '') : '';
+    covenant_setStatus(covenant_t && !covenant_t.url ? 'Getting things ready...' : '');
+    covenant_renderTabs();
+  }
+
+  function covenant_closeTab(covenant_id) {
+    var covenant_idx = -1;
+    for (var covenant_i = 0; covenant_i < covenant_tabs.length; covenant_i++) {if (covenant_tabs[covenant_i].id === covenant_id) {covenant_idx = covenant_i;break;}}
+    if (covenant_idx < 0) return;
+    try {covenant_viewport.removeChild(covenant_tabs[covenant_idx].frame);} catch (covenant_e) {}
+    covenant_tabs.splice(covenant_idx, 1);
+    if (!covenant_tabs.length) {covenant_shell.classList.remove("chapel-fs", "chapel-results-fs");covenant_activeId = null;covenant_setStatus('');covenant_renderTabs();covenant_updateStart();return;}
+    covenant_activate(covenant_tabs[Math.max(0, covenant_idx - 1)].id);
+  }
+
+  function covenant_reloadActiveTab() {
+    var covenant_tab = covenant_activeId !== null ? covenant_byId(covenant_activeId) : null;
+    if (!covenant_tab) return;
+    if (!covenant_tab.url) {covenant_cmd(covenant_tab.id, 'reload');return;}
+    covenant_setStatus('Refreshing...');
+    var covenant_oldFrame = covenant_tab.frame;
+    var covenant_frame = document.createElement('iframe');
+    covenant_frame.allow = 'microphone; camera; fullscreen; autoplay; clipboard-write';
+    covenant_frame.setAttribute('allowfullscreen', '');
+    covenant_frame.src = covenant_ENGINE;
+    covenant_tab.frame = covenant_frame;
+    covenant_tab.ready = false;
+    covenant_tab.pending = covenant_tab.url;
+    covenant_tab.title = '';
+    try {covenant_viewport.replaceChild(covenant_frame, covenant_oldFrame);} catch (covenant_e) {covenant_viewport.appendChild(covenant_frame);}
+    covenant_activate(covenant_tab.id);
+    covenant_renderTabs();
+  }
+
+  function covenant_newTab(covenant_url) {
+    var covenant_id = covenant_nextId++;
+    var covenant_frame = document.createElement('iframe');
+    covenant_frame.allow = 'microphone; camera; fullscreen; autoplay; clipboard-write';
+    covenant_frame.setAttribute('allowfullscreen', '');
+    covenant_frame.src = covenant_ENGINE;
+    covenant_viewport.appendChild(covenant_frame);
+    var covenant_tab = { id: covenant_id, frame: covenant_frame, url: '', title: '', ready: false, pending: covenant_url || null, relayIndex: -1 };
+    covenant_tabs.push(covenant_tab);
+    covenant_activate(covenant_id);
+    covenant_updateStart();
+    return covenant_tab;
+  }
+
+  function covenant_pickPilgrimage(covenant_tab) {
+    var covenant_list = covenant_pilgrimage ? [covenant_pilgrimage].concat(covenant_PILGRIMAGES.filter(function (covenant_r) {return covenant_r !== covenant_pilgrimage;})) : covenant_PILGRIMAGES.slice();
+    (function covenant_attempt(covenant_i) {
+      if (covenant_i >= covenant_list.length) {covenant_use(covenant_list[covenant_list.length - 1], covenant_list);return;}
+      var covenant_url = covenant_list[covenant_i],covenant_settled = false;
+      function covenant_next() {if (!covenant_settled) {covenant_settled = true;covenant_attempt(covenant_i + 1);}}
+      try {
+        var covenant_ws = new WebSocket(covenant_url);
+        var covenant_timer = setTimeout(function () {if (!covenant_settled) {covenant_settled = true;try {covenant_ws.close();} catch (covenant_e) {}covenant_attempt(covenant_i + 1);}}, 3000);
+        covenant_ws.onopen = function () {if (covenant_settled) return;covenant_settled = true;clearTimeout(covenant_timer);try {covenant_ws.close();} catch (covenant_e) {}covenant_use(covenant_url, covenant_list);};
+        covenant_ws.onerror = function () {clearTimeout(covenant_timer);covenant_next();};
+        covenant_ws.onclose = function () {clearTimeout(covenant_timer);covenant_next();};
+      } catch (covenant_e) {covenant_next();}
+    })(0);
+
+    function covenant_use(covenant_url, covenant_list) {
+      covenant_pilgrimage = covenant_url;
+      try {localStorage.setItem(covenant_PILGRIMAGE_KEY, covenant_url);} catch (covenant_e) {}
+      covenant_tab.relays = covenant_list;
+      covenant_tab.relayIndex = covenant_list.indexOf(covenant_url);
+      covenant_cmd(covenant_tab.id, 'setW1p', { w1p: covenant_url });
+      if (covenant_tab.pending) {covenant_cmd(covenant_tab.id, 'navigate', { url: covenant_tab.pending });covenant_tab.pending = null;}
+    }
+  }
+
+  window.addEventListener('message', function (covenant_e) {
+    var covenant_d = covenant_e.data;
+    if (!covenant_d || covenant_d.source !== 'e') return;
+    var covenant_type = (covenant_d.type || '').replace('e:', '');
+    var covenant_tab = null;
+    for (var covenant_i = 0; covenant_i < covenant_tabs.length; covenant_i++) {try {if (covenant_tabs[covenant_i].frame.contentWindow === covenant_e.source) {covenant_tab = covenant_tabs[covenant_i];break;}} catch (covenant_err) {}}
+    if (!covenant_tab) return;
+
+    if (covenant_type === 'ready') {
+      covenant_tab.ready = true;
+      covenant_pickPilgrimage(covenant_tab);
+    } else if (covenant_type === 'urlchange') {
+      if (covenant_d.url) {
+        covenant_tab.url = covenant_d.url;
+        if (covenant_tab.id === covenant_activeId) {covenant_urlBar.value = covenant_d.url;covenant_setStatus('');}
+        covenant_renderTabs();
+      }
+    } else if (covenant_type === 'titlechange') {
+      if (covenant_d.title) {covenant_tab.title = covenant_d.title;covenant_renderTabs();}
+    } else if (covenant_type === 'error') {
+      var covenant_list = covenant_tab.relays || covenant_PILGRIMAGES;
+      var covenant_next = covenant_list[(covenant_tab.relayIndex || 0) + 1];
+      if (covenant_next) {
+        covenant_tab.relayIndex = covenant_list.indexOf(covenant_next);
+        covenant_pilgrimage = covenant_next;
+        try {localStorage.setItem(covenant_PILGRIMAGE_KEY, covenant_next);} catch (covenant_e) {}
+        covenant_cmd(covenant_tab.id, 'setW1p', { w1p: covenant_next });
+        if (covenant_tab.url) covenant_cmd(covenant_tab.id, 'navigate', { url: covenant_tab.url });
+        return;
+      }
+      if (covenant_tab.id === covenant_activeId) covenant_setStatus("That page wouldn't load. Try again or search something else.");
+    }
+  });
+
+  function covenant_open(covenant_value) {
+    var covenant_url = covenant_toUrl(covenant_value);
+    if (!covenant_url) return;
+    var covenant_tab = covenant_activeId !== null ? covenant_byId(covenant_activeId) : null;
+    if (!covenant_tab) {covenant_newTab(covenant_url);return;}
+    if (covenant_tab.ready) {covenant_cmd(covenant_tab.id, 'navigate', { url: covenant_url });covenant_tab.pending = null;covenant_setStatus('Loading...');} else
+    {covenant_tab.pending = covenant_url;}
+  }
+
+
+  var covenant_homeForm = document.getElementById("homeSeekForm");
+  var covenant_homeInput = document.getElementById("homeSeekInput");
+  if (covenant_homeForm && covenant_homeInput) {
+    covenant_homeForm.addEventListener('submit', function (covenant_e) {
+      covenant_e.preventDefault();
+      var covenant_v = covenant_homeInput.value;
+      if (!covenant_v || !covenant_v.trim()) return;
+      covenant_homeInput.value = '';
+      covenant_homeInput.blur();
+      covenant_goToView("chapel");
+      covenant_open(covenant_v);
+    });
+    covenant_homeForm.addEventListener('click', function () {covenant_homeInput.focus();});
+  }
+
+  function covenant_goFromBar() {var covenant_v = covenant_urlBar.value;if (!covenant_v || !covenant_v.trim()) return;covenant_urlBar.blur();covenant_open(covenant_v);}
+  covenant_urlBar.addEventListener('keydown', function (covenant_e) {if (covenant_e.key !== 'Enter') return;covenant_e.preventDefault();covenant_goFromBar();});
+  document.getElementById("chapelGo").addEventListener('click', covenant_goFromBar);
+
+  document.getElementById("chapelBack").addEventListener('click', function () {if (covenant_activeId !== null) covenant_cmd(covenant_activeId, 'back');});
+  document.getElementById("chapelReload").addEventListener('click', covenant_reloadActiveTab);
+  document.getElementById("chapelHome").addEventListener('click', function () {covenant_open('https://duckduckgo.com');});
+  document.getElementById("chapelNewTab").addEventListener('click', function () {covenant_newTab(null);covenant_setStatus('Type an address above, then press Enter.');covenant_urlBar.focus();});
+  document.getElementById("chapelClose").addEventListener('click', function () {while (covenant_tabs.length) covenant_closeTab(covenant_tabs[covenant_tabs.length - 1].id);covenant_goToView('home');});
+  document.getElementById("chapelFull").addEventListener('click', function () {covenant_shell.classList.toggle("chapel-fs");});
+  document.getElementById("chapelResultsFull").addEventListener('click', function () {covenant_shell.classList.toggle("chapel-results-fs");});
+  document.getElementById("chapelResultsExit").addEventListener('click', function () {covenant_shell.classList.remove("chapel-results-fs");});
+
+  document.addEventListener('keydown', function (covenant_e) {
+    if (covenant_e.ctrlKey && covenant_e.shiftKey && covenant_e.code === 'KeyZ') {while (covenant_tabs.length) covenant_closeTab(covenant_tabs[covenant_tabs.length - 1].id);}
+    if (covenant_e.key === 'Escape') {
+      if (covenant_shell.classList.contains("chapel-results-fs")) covenant_shell.classList.remove("chapel-results-fs");else
+      if (covenant_shell.classList.contains("chapel-fs")) covenant_shell.classList.remove("chapel-fs");
+    }
+  });
+})();
+    </script>
+</body>
+</html>
