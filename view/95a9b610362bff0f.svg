@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="width:100vw;height:100vh;position:fixed;top:0;left:0;margin:0;padding:0;border:none;overflow:hidden;">
+  <foreignObject width="100%" height="100%" style="width:100%;height:100%;border:none;margin:0;padding:0;overflow:hidden;pointer-events:auto;">
+    <html xmlns="http://www.w3.org/1999/xhtml" lang="en" style="width:100%;height:100%;margin:0;padding:0;overflow:hidden;">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Godly OS — Divine Operating System</title>
+        <style>
+          * { box-sizing: border-box; }
+          html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #020617;
+          }
+          #godly-viewport {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            pointer-events: auto;
+          }
+          #godly-splash {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0f0c1b 0%, #050509 100%);
+            z-index: 10;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+          }
+          .spin-ring {
+            width: 46px;
+            height: 46px;
+            border: 3px solid rgba(168, 85, 247, 0.2);
+            border-top-color: #a855f7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+            box-shadow: 0 0 24px rgba(168, 85, 247, 0.35);
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          .os-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+          }
+          .os-status {
+            font-size: 12px;
+            color: #c084fc;
+            margin-top: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="godly-splash">
+          <div class="spin-ring"></div>
+          <div class="os-title">Godly OS — Divine Edition</div>
+          <div class="os-status" id="godly-status">Streaming Godly OS from jsDelivr CDN...</div>
+          <div id="godly-fallback-wrap" style="display:none; flex-direction:column; align-items:center; gap:8px; margin-top:20px; z-index:30; pointer-events:auto;">
+            <a id="godly-fallback-btn" href="https://donoela.github.io/Godly-OS-Workspac---Github/" target="_blank" style="display:inline-flex; align-items:center; gap:8px; padding:12px 24px; background:linear-gradient(135deg, #9333ea, #4f46e5); color:#ffffff; border-radius:12px; text-decoration:none; font-size:13px; font-weight:700; font-family:-apple-system,BlinkMacSystemFont,sans-serif; box-shadow:0 0 25px rgba(168,85,247,0.5); pointer-events:auto; cursor:pointer;">
+              <span>🚀 Open Live Mirror (GitHub Pages) ↗</span>
+            </a>
+            <span style="font-size:10px; color:rgba(255,255,255,0.4); font-family:monospace;">Edge CDN fallback if streaming is blocked</span>
+          </div>
+        </div>
+        <iframe id="godly-viewport" allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write; cross-origin-isolated" allowfullscreen="true"></iframe>
+        <script><![CDATA[
+          (async function () {
+            const status = document.getElementById('godly-status');
+            const splash = document.getElementById('godly-splash');
+            const frame = document.getElementById('godly-viewport');
+            const fallbackWrap = document.getElementById('godly-fallback-wrap');
+
+            let dismissed = false;
+            function dismiss() {
+              if (dismissed) return;
+              dismissed = true;
+              if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 450);
+              }
+            }
+
+            frame.onload = () => {
+              setTimeout(dismiss, 400);
+            };
+
+            const loc = window.location.href;
+            const isJsDelivr = loc.includes('cdn.jsdelivr.net');
+            const isWasmer = loc.includes('wasmer.app') || loc.includes('wasmer.io');
+            const origin = window.location.origin || '';
+
+            // Handle jsDelivr direct streaming:
+            if (isJsDelivr) {
+              try {
+                let tag = 'v4.5.3';
+                const tagMatch = loc.match(/@([^/]+)/);
+                if (tagMatch && tagMatch[1] && tagMatch[1] !== 'main') {
+                  tag = tagMatch[1];
+                }
+                const baseHref = 'https://cdn.jsdelivr.net/gh/donoEla/Godly-OS-Workspac---Github@' + tag + '/dist/';
+                const htmlUrl = baseHref + 'index.html?v=' + tag;
+
+                const res = await fetch(htmlUrl);
+                if (res.ok) {
+                  let html = await res.text();
+                  // Clean any router or redirect scripts
+                  html = html.replace(/<script>[\s\S]*?Production Deployment Router[\s\S]*?<\/script>/gi, '');
+                  html = html.replace(/<noscript>[\s\S]*?<\/noscript>/gi, '');
+
+                  // Ensure <base href="..."> is present so all relative JS/CSS/assets resolve to jsDelivr
+                  if (!html.includes('<base ')) {
+                    html = html.replace('<head>', '<head>\n    <base href="' + baseHref + '">');
+                  }
+                  // Rewrite relative ./ paths to absolute jsDelivr CDN endpoints with cache-buster
+                  html = html.replace(/(src|href)=["']\.\/([^"']+)["']/gi, function(_, attr, relPath) {
+                    return attr + '="' + baseHref + relPath + (relPath.includes('?') ? '&' : '?') + 'v=' + tag + '"';
+                  });
+
+                  // Stream directly into iframe. No redirect.
+                  frame.srcdoc = html;
+                  setTimeout(dismiss, 1200);
+                  return;
+                }
+              } catch (err) {
+                console.warn('jsDelivr inline stream error:', err);
+              }
+            }
+
+            // If on Wasmer:
+            if (isWasmer && origin && origin !== 'null') {
+              frame.src = origin + '/';
+              setTimeout(dismiss, 1200);
+              return;
+            }
+
+            // If local development or non-jsDelivr:
+            if (!isJsDelivr && origin && origin !== 'null' && window.location.protocol.startsWith('http')) {
+              frame.src = './dist/';
+              setTimeout(dismiss, 1200);
+              return;
+            }
+
+            // Fallback only if inline streaming was blocked:
+            if (status) status.textContent = 'CDN stream blocked. Click below to launch:';
+            if (fallbackWrap) fallbackWrap.style.display = 'flex';
+            frame.src = 'https://donoela.github.io/Godly-OS-Workspac---Github/';
+            setTimeout(dismiss, 3500);
+          })();
+        ]]></script>
+      </body>
+    </html>
+  </foreignObject>
+</svg>
