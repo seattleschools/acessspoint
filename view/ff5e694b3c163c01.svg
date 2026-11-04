@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml"
+    width="100%"
+    height="100%"
+    style="display:block;margin:0;padding:0;width:100vw;height:100vh;position:fixed;top:0;left:0;overflow:hidden;background:#000;">
+
+    <foreignObject
+        x="0"
+        y="0"
+        width="100%"
+        height="100%"
+        style="overflow:visible;width:100%;height:100%;">
+
+        <xhtml:iframe
+            id="html-frame"
+            frameborder="0"
+            scrolling="auto"
+            allow="fullscreen; autoplay; gamepad; clipboard-read; clipboard-write; microphone; camera"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-pointer-lock"
+            style="
+                position:fixed;
+                inset:0;
+                width:100%;
+                height:100%;
+                border:0;
+                margin:0;
+                padding:0;
+                display:block;
+                overflow:auto;
+                z-index:999999;
+            ">
+        </xhtml:iframe>
+
+    </foreignObject>
+
+    <script><![CDATA[
+(function () {
+    const encoded = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCIgLz4KICAgIDx0aXRsZT5tb3NzaWUgbG9hZGVyIGJ5IEBjYXB0YWluY3NzPC90aXRsZT4KPC9oZWFkPgo8Ym9keSBzdHlsZT0iYmFja2dyb3VuZDojMDAwIj4KICAgIDxkaXY+CiAgICAgICAgPHA+QVBTdHVkeSBoZWxwcyBzdHVkZW50cyBtYXN0ZXIgYWxnZWJyYSwgY2FsY3VsdXMsIGdlb21ldHJ5LCBhbmQgdHJpZ29ub21ldHJ5IGFsb25nc2lkZSBlc3NheSB3cml0aW5nLCBncmFtbWFyLCBhbmQgbGl0ZXJhcnkgYW5hbHlzaXMgZm9yIEFQIGV4YW1zLjwvcD4KICAgICAgICA8c2VjdGlvbj4KICAgICAgICAgICAgPGgyPk1hdGhlbWF0aWNzPC9oMj4KICAgICAgICAgICAgPHA+V2UgY292ZXIgYWxnZWJyYSwgY2FsY3VsdXMsIGRlcml2YXRpdmVzLCBpbnRlZ3JhbHMsIHF1YWRyYXRpYyBlcXVhdGlvbnMsIHByb2JhYmlsaXR5LCBhbmQgc3RhdGlzdGljcyBpbmNsdWRpbmcgdGhlIFB5dGhhZ29yZWFuIHRoZW9yZW0gYW5kIHRyaWdvbm9tZXRyeS48L3A+CiAgICAgICAgPC9zZWN0aW9uPgogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+U2NpZW5jZTwvaDI+CiAgICAgICAgICAgIDxwPlNlc3Npb25zIGNvdmVyIGJpb2xvZ3ksIGNoZW1pc3RyeSwgYW5kIHBoeXNpY3MgdGhyb3VnaCBoeXBvdGhlc2lzLCBleHBlcmltZW50LCBwaG90b3N5bnRoZXNpcywgYW5kIHRoZXJtb2R5bmFtaWNzLjwvcD4KICAgICAgICA8L3NlY3Rpb24+CiAgICAgICAgPHNlY3Rpb24+CiAgICAgICAgICAgIDxoMj5FbmdsaXNoIGFuZCBXcml0aW5nPC9oMj4KICAgICAgICAgICAgPHA+VHV0b3JzIGhlbHAgd2l0aCBlc3NheSwgdGhlc2lzLCBncmFtbWFyLCBzeW50YXgsIHJoZXRvcmljLCBzeW1ib2xpc20sIGFuZCBpcm9ueSBhY3Jvc3MgcGVyc3Vhc2l2ZSBhbmQgbmFycmF0aXZlIHdyaXRpbmcuPC9wPgogICAgICAgIDwvc2VjdGlvbj4KICAgIDwvZGl2PgoKICAgIDxzY3JpcHQ+CiAgICAgICAgKGFzeW5jICgpID0+IHsKICAgICAgICAgICAgLy8gUmUtc3R5bGUgYW5kIHVwZGF0ZSBsb2FkaW5nIG1lc3NhZ2UgdG8gbWFpbnRhaW4gY2Ftb3VmbGFnZQogICAgICAgICAgICBkb2N1bWVudC5ib2R5LnN0eWxlLmNzc1RleHQgPSAiYmFja2dyb3VuZDojMDAwO2NvbG9yOiNmZmY7bWFyZ2luOjA7aGVpZ2h0OjEwMHZoO2Rpc3BsYXk6ZmxleDtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO2FsaWduLWl0ZW1zOmNlbnRlcjtmb250LWZhbWlseTpzYW5zLXNlcmlmO2ZvbnQtc2l6ZToxLjVyZW07IjsKICAgICAgICAgICAgZG9jdW1lbnQuYm9keS50ZXh0Q29udGVudCA9ICJMb2FkaW5nIE1vc3NpZS4uLiI7CgogICAgICAgICAgICAvLyBUYXJnZXRlZCB0YXJnZXQgVVJMIGZvciByYXcgR2l0SHViIHJhdyBjb250ZW50IG9mIE1vc3NpZS5odG1sCiAgICAgICAgICAgIGNvbnN0IHJhd1VybCA9ICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vQ2FwdGFpbkNTUy9tb3NzaWUtc2luZ2xlZmlsZS9tYWluL01vc3NpZS5odG1sIjsKCiAgICAgICAgICAgIHRyeSB7CiAgICAgICAgICAgICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKHJhd1VybCk7CiAgICAgICAgICAgICAgICBpZiAoIXJlc3BvbnNlLm9rKSB7CiAgICAgICAgICAgICAgICAgICAgdGhyb3cgbmV3IEVycm9yKGBGYWlsZWQgdG8gZmV0Y2ggZmlsZTogJHtyZXNwb25zZS5zdGF0dXNUZXh0fWApOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgY29uc3QgaHRtbENvbnRlbnQgPSBhd2FpdCByZXNwb25zZS50ZXh0KCk7CgogICAgICAgICAgICAgICAgLy8gUmVwbGFjZSB0aGUgZW50aXJlIGRvY3VtZW50IHdpdGggdGhlIGZldGNoZWQgSFRNTCBjb250ZW50CiAgICAgICAgICAgICAgICBkb2N1bWVudC5vcGVuKCk7CiAgICAgICAgICAgICAgICBkb2N1bWVudC53cml0ZShodG1sQ29udGVudCk7CiAgICAgICAgICAgICAgICBkb2N1bWVudC5jbG9zZSgpOwogICAgICAgICAgICB9IGNhdGNoIChlcnIpIHsKICAgICAgICAgICAgICAgIGNvbnNvbGUuZXJyb3IoIkVycm9yIGxvYWRpbmcgdGFyZ2V0IGZpbGU6IiwgZXJyKTsKICAgICAgICAgICAgICAgIGRvY3VtZW50LmJvZHkudGV4dENvbnRlbnQgPSAiRmFpbGVkIHRvIGxvYWQgTW9zc2llLiI7CiAgICAgICAgICAgIH0KICAgICAgICB9KSgpOwogICAgPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPg==";
+    const binary = atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    const html = new TextDecoder("utf-8").decode(bytes);
+    const frame = document.getElementById("html-frame");
+    if (!frame) return;
+    frame.srcdoc = html;
+})();
+    ]]></script>
+</svg>
