@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otonic Lite</title>
+</head>
+    <script type="module">
+        async function getCu() {
+            const cus = [
+                "aHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L2doL290b25pY3ViZy9vdHNm",
+                "aHR0cHM6Ly9mYXN0bHkuanNkZWxpdnIubmV0L2doL290b25pY3ViZy9vdHNm",
+                "aHR0cHM6Ly9nY29yZS5qc2RlbGl2ci5uZXQvZ2gvb3RvbmljdWJnL290c2Y=",
+                "aHR0cHM6Ly90ZXN0aW5nY2YuanNkZWxpdnIubmV0L2doL290b25pY3ViZy9vdHNm",
+
+                "aHR0cHM6Ly9xdWFudGlsLmpzZGVsaXZyLm5ldC9naC9vdG9uaWN1Ymcvb3RzZg==",
+            ]
+            let cu = null
+            for (const u of cus) {
+                try {
+                    const res = await fetch(`${atob(u)}@latest/ok`)
+
+                    if (!res.ok) continue
+
+                    const data = await res.text()
+                    if (data.trim() === "ok") {
+                        cu = u
+                        return u
+                    }
+                } catch (err) {
+                    console.log(err)
+                }
+            }
+            return cu
+        }
+        async function getVersion(cu) {
+            const res = await fetch(`${atob(cu)}@latest/version?v=${Math.floor(Math.random() * 1000000)}`)
+            
+            if (!res.ok) return
+
+            const text = await res.text()
+            return text
+        }
+        let cu = await getCu()
+        let cuv
+        if (cu) {
+            const version = await getVersion(cu)
+            cuv = version ? `@${version}` : "@latest"
+        }
+
+        const res = await fetch(`${atob(cu)}${cuv}/index.html`)
+        const data = await res.text()
+        document.open()
+        document.write(data)
+        document.close()
+    </script>
+</html>
