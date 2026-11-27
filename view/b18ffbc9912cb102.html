@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sunset</title>
+<style>
+  html,body{margin:0;min-height:100%;background:#0a0605;color:#f5e6d3;font:16px system-ui,sans-serif}
+  body{display:flex;align-items:center;justify-content:center;padding:24px}
+  .box{max-width:420px;width:100%;text-align:center}
+  .mark{width:56px;height:56px;border-radius:14px;margin:0 auto 1rem;background:linear-gradient(145deg,#ff8c4a,#ff6b35);box-shadow:0 0 32px rgba(255,120,50,.35)}
+  h1{font-size:1.35rem;font-weight:700;margin:0 0 .5rem;background:linear-gradient(135deg,#fff5eb,#ffb07a,#ff6b35);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #status{color:#c9a88a;line-height:1.45;margin:0 0 1.25rem}
+  .btns{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
+  button{padding:.55rem 1rem;border-radius:999px;border:1px solid rgba(255,140,80,.35);background:rgba(255,140,80,.15);color:#f5e6d3;font:inherit;font-size:.85rem;cursor:pointer}
+  button:hover{background:rgba(255,140,80,.28)}
+  button[hidden]{display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="mark" aria-hidden="true"></div>
+  <h1>Sunset</h1>
+  <p id="status" role="status">Checking for the latest Sunset…</p>
+  <div class="btns">
+    <button id="retry" hidden>Try again</button>
+    <button id="older" hidden>Load saved version instead</button>
+  </div>
+</div>
+<script>
+(()=>{
+const repo='aetheris0/sunset';
+const file='index.html';
+const key='sunset-loader-aetheris0-sunset-commit';
+const status=document.getElementById('status');
+const retry=document.getElementById('retry');
+const older=document.getElementById('older');
+let saved='',busy=false;
+try{saved=localStorage.getItem(key)||''}catch{}
+
+const raw=ref=>'https://raw.githubusercontent.com/'+repo+'/'+ref+'/'+file;
+const cdns=ref=>[
+  'cdn.jsdelivr.net',
+  'fastly.jsdelivr.net',
+  'gcore.jsdelivr.net',
+  'testingcf.jsdelivr.net'
+].map(host=>'https://'+host+'/gh/'+repo+'@'+ref+'/'+file);
+
+function baseFromUrl(url){return url.replace(/\/[^\/]*$/,'/')}
+
+/* Injected into Sunset page.
+   IMPORTANT: open about:blank synchronously on click (user gesture),
+   then fetch + document.write into that window. */
+const interceptScript = `
+<script>
+(function(){
+  function absUrl(href){
+    try{return new URL(href, document.baseURI).href}catch(e){return href}
+  }
+  function isGameOrProxy(a){
+    if(!a||!a.getAttribute)return false;
+    if(a.matches && (a.matches('a.card')||a.matches('a.proxy-btn')))return true;
+    return a.classList&&(a.classList.contains('card')||a.classList.contains('proxy-btn'));
+  }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest ? e.target.closest('a') : null;
+    if(!isGameOrProxy(a))return;
+    var href=a.getAttribute('href');
+    if(!href||href==='#'||href.indexOf('javascript:')===0)return;
+    // leave pure external sites alone (not repo mirrors)
+    if(/^https?:\\/\\//i.test(href) && !/raw\\.githubusercontent|jsdelivr|githack|statically|github/i.test(href))return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    var url=absUrl(href);
+    // Open immediately while still in the click gesture
+    var w=window.open('about:blank','_blank');
+    if(!w){
+      alert('Popup blocked. Allow popups for this site, then try again.');
+      return;
+    }
+    try{
+      w.document.open();
+      w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Loading…</title><style>body{margin:0;background:#0a0605;color:#c9a88a;font:16px system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh}</style></head><body>Loading…</body></html>');
+      w.document.close();
+    }catch(_){}
+
+    fetch(url,{cache:'no-store'}).then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.text();
+    }).then(function(html){
+      try{
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+      }catch(err){
+        try{w.location.href=url}catch(__){}
+      }
+    }).catch(function(){
+      try{
+        w.document.open();
+        w.document.write('<!doctype html><html><body style="font:16px system-ui;background:#0a0605;color:#f5e6d3;padding:24px">Could not load this page.<br><br><a style="color:#ffb07a" href="'+url.replace(/"/g,'&quot;')+'">Open directly</a></body></html>');
+        w.document.close();
+      }catch(__){
+        try{w.location.href=url}catch(___){}
+      }
+    });
+  },true);
+})();
+<\/script>`;
+
+function patchHtml(html, base){
+  var baseTag='<base href="'+base+'">';
+  if(/<base\s/i.test(html)) html=html.replace(/<base[^>]*>/i, baseTag);
+  else if(/<head[^>]*>/i.test(html)) html=html.replace(/<head[^>]*>/i, function(m){return m+baseTag});
+  else html=baseTag+html;
+
+  if(/<\/body>/i.test(html)) html=html.replace(/<\/body>/i, interceptScript+'</body>');
+  else html+=interceptScript;
+  return html;
+}
+
+async function download(url,ref){
+  try{
+    const r=await fetch(url+(url.includes('?')?'&':'?')+'sunset_load='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(25000)});
+    if(!r.ok)return false;
+    let html=await r.text();
+    if(!/<html[\s>]/i.test(html))return false;
+    if(!html.includes('Sunset')&&!html.includes('data-theme'))return false;
+    try{if(/^[a-f0-9]{40}$/.test(ref))localStorage.setItem(key,ref)}catch{}
+    const base=baseFromUrl(url.split('?')[0]);
+    html=patchHtml(html, base);
+    window.sunsetLoaderInfo={ref,source:url,base:base};
+    document.open();
+    document.write(html);
+    document.close();
+    return true;
+  }catch{return false}
+}
+
+async function start(){
+  if(busy)return;
+  busy=true;
+  retry.hidden=older.hidden=true;
+  status.textContent='Checking for the latest Sunset…';
+  let latest='';
+  try{
+    const r=await fetch('https://api.github.com/repos/'+repo+'/commits/main?sunset_check='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(8000)});
+    if(r.ok){
+      const data=await r.json();
+      if(/^[a-f0-9]{40}$/.test(data.sha))latest=data.sha;
+    }
+  }catch{}
+
+  const sources=latest?[...cdns(latest),raw(latest)]:[...cdns('main'),raw('main')];
+  for(const url of sources){
+    status.textContent=latest?'Loading the latest verified version…':'GitHub version check unavailable. Trying the current branch…';
+    if(await download(url,latest||'main'))return;
+  }
+  busy=false;
+  status.textContent='The current version could not be loaded. Retry, or explicitly open your saved version.';
+  retry.hidden=false;
+  older.hidden=!/^[a-f0-9]{40}$/.test(saved);
+}
+
+retry.onclick=start;
+older.onclick=async()=>{
+  if(busy)return;
+  busy=true;
+  status.textContent='Loading your saved version (may be outdated)…';
+  for(const url of [...cdns(saved),raw(saved)]) if(await download(url,saved))return;
+  busy=false;
+  status.textContent='Saved version unavailable. Check your connection and retry.';
+  retry.hidden=false;
+};
+
+start();
+})();
+</script>
+</body>
+</html>
